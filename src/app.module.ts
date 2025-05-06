@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonsModule } from './commons/commons.module';
 import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
+import { EventModule } from './event/event.module';
+import { PresentationModule } from './presentation/presentation.module';
+import { TicketModule } from './ticket/ticket.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -19,7 +22,10 @@ import { AuthModule } from './auth/auth.module';
     }),
     CommonsModule,
     SeedModule,
-    AuthModule
+    AuthModule,
+    EventModule,
+    PresentationModule,
+    TicketModule
   ],
   controllers: [],
   providers: [],
