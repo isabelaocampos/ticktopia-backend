@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { StudentsService } from '../students/students.service';
 import { initialData } from './data/seed-data';
 import { Student } from '../students/entities/student.entity';
+import { EventService } from 'src/event/event.service';
 
 @Injectable()
 export class SeedService {
 
-  constructor(private readonly studentService: StudentsService){}
+  constructor(private readonly studentService: StudentsService,
+              private readonly eventService: EventService){}
 
 
 async runSeed() {
@@ -28,6 +30,18 @@ async insertNewStudents(){
   await Promise.all(insertPromises);
 
   return true;
+}
+
+async insertNewEvents(){
+  await this.eventService.deleteAllEvents();
+  const events = initialData.events;
+  const insertPromises: Promise<Event | undefined>[] = [];
+  events.forEach(event => {
+    insertPromises.push(this.eventService.create(event))
+  });
+  await Promise.all(insertPromises);
+  return true;
+
 }
 
 }
