@@ -10,7 +10,7 @@ import {
   import { BuyTicketDto } from './dto/buy-ticket.dto';
   import { CancelTicketDto } from './dto/cancel-ticket.dto';
   //import { User } from 'src/users/entities/user.entity';
-  //import { Event } from 'src/events/entities/event.entity';
+  import { Event } from 'src/event/entities/event.entity';
   
   @Injectable()
   export class TicketsService {

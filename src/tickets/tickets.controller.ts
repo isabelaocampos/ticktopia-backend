@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { BuyTicketDto } from './dto/buy-ticket.dto';
+import { TicketsService } from './tickets.service';
+import { CancelTicketDto } from './dto/cancel-ticket.dto';
 
 
 @Controller('tickets')
@@ -23,8 +25,8 @@ export class TicketsController {
   }
 
   @Put(':id/cancel')
-  cancelTicket(@Param('id') id: number, @Req() req) {
-    return this.ticketService.cancelTicket(id, req.user.id);
+  cancelTicket(@Param('id') id: number, @Req() req, @Body() dto: CancelTicketDto) {
+    return this.ticketService.cancelTicket(id, req.user.id, dto);
   }
 }
 

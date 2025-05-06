@@ -2,6 +2,7 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGenerated
 import { Grade } from "./grade.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { Event } from "../../event/entities/event.entity";
+import { Ticket } from "src/tickets/entities/ticket.entity";
 
 @Entity()
 export class Student {
@@ -101,5 +102,11 @@ export class Student {
 
     @OneToMany(() => Event, event => event.user)
     events: Event[];
+
+    @OneToMany(() => Ticket, ticket => ticket.event)
+    tickets: Ticket[];
+
+
+
 
 }
