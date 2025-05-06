@@ -40,7 +40,7 @@ export class StudentsController {
   @ApiResponse({ status: 200, description: 'Student was removed' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 403, description: 'Forbidden. Token related.' })
-  @Auth(ValidRoles.admin, ValidRoles.superUser)
+  @Auth(ValidRoles.admin, ValidRoles.eventManager)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.studentsService.remove(id);
   }

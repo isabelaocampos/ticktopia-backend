@@ -1,5 +1,5 @@
 export enum ValidRoles{
     eventManager = 'event-manager',
-    superUser = 'super-user',
+    admin = 'super-user',
     user = 'user'
 }
