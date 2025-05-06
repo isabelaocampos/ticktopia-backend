@@ -1,6 +1,7 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Grade } from "./grade.entity";
 import { ApiProperty } from "@nestjs/swagger";
+import { Event } from "../../event/entities/event.entity";
 
 @Entity()
 export class Student {
@@ -97,4 +98,8 @@ export class Student {
                                         .replaceAll(" ", "_")
                                         +this.age;
     }
+
+    @OneToMany(() => Event, event => event.user)
+    events: Event[];
+
 }

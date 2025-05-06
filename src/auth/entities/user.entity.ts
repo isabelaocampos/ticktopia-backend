@@ -1,4 +1,5 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+
 
 @Entity('users')
 export class User {
@@ -34,4 +35,7 @@ export class User {
     checkFieldsBeforeUpdate() {
       this.checkFieldsBeforeInsert();
     }
+
+    
+
 }

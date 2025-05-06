@@ -5,6 +5,9 @@ import { StudentsModule } from './students/students.module';
 import { CommonsModule } from './commons/commons.module';
 import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
+import { EventController } from './event/event.controller';
+import { EventService } from './event/event.service';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -22,9 +25,10 @@ import { AuthModule } from './auth/auth.module';
     StudentsModule,
     CommonsModule,
     SeedModule,
-    AuthModule
+    AuthModule,
+    EventModule
   ],
-  controllers: [],
-  providers: [],
+  controllers: [EventController],
+  providers: [EventService],
 })
 export class AppModule {}
