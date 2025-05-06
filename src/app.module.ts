@@ -4,8 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonsModule } from './commons/commons.module';
 import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
-import { TicketsService } from './tickets/tickets.service';
-import { TicketsController } from './tickets/tickets.controller';
+import { TicketService } from './ticket/ticket.service';
+import { TicketController } from './ticket/ticket.controller';
 import { EventController } from './event/event.controller';
 import { EventService } from './event/event.service';
 import { EventModule } from './event/event.module';
@@ -31,8 +31,8 @@ import { TicketModule } from './ticket/ticket.module';
     PresentationModule,
     TicketModule
   ],
-  controllers: [TicketsController, EventController],
-  providers: [TicketsService, EventService],
+  controllers: [TicketController, EventController],
+  providers: [TicketService, EventService],
 
 })
 export class AppModule {}
