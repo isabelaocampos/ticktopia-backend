@@ -14,14 +14,17 @@ export class User {
     password?: string;
 
     @Column('text')
-    fullName: string;
+    name: string;
+
+    @Column('text')
+    lastname: string;
 
     @Column('bool', { default: true })
     isActive: boolean;
 
     @Column('text',{
         array: true,
-        default: ['teacher']
+        default: ['client']
     })
     roles: string[];
 

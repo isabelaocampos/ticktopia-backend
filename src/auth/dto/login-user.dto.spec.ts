@@ -1,6 +1,6 @@
 import { plainToClass } from "class-transformer";
 import { validate } from "class-validator";
-import { LoginUserDto } from "./login-user.dto";
+import { LoginUserDto } from './Login-user.dto';
 
 describe('LoginUserDTO', () => {
     it('should have the correct properties', async () => {

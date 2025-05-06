@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './interfaces/jwt.interface';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUserDto } from './dto/login-user.dto';
+import { LoginUserDto } from './dto/Login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +35,29 @@ export class AuthService {
 
 
     }catch(error){
+      console.log("error login",error);
+      this.handleExceptions(error);
+    }
+  }
+
+  async createEventManger(createAuthDto: CreateAuthDto) {
+    const {password, ...userData } = createAuthDto;
+    try{
+      const user = this.userRepository.create({
+        ...{...userData, roles: ["event-manaeger"]},
+        password: bcrypt.hashSync(password, 10)
+      });
+      await this.userRepository.save(user);
+      delete user.password;
+
+      return {
+        user:user,
+        token: this.getJwtToken({id: user.id})
+      };
+
+
+    }catch(error){
+      console.log("error login",error);
       this.handleExceptions(error);
     }
   }
