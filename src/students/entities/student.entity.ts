@@ -9,7 +9,8 @@ import {
   import { Grade } from "./grade.entity";
   import { Event } from "../../event/entities/event.entity";
   import { ApiProperty } from "@nestjs/swagger";
-  
+  import { Ticket } from "src/tickets/entities/ticket.entity";
+
   @Entity()
   export class Student {
     @ApiProperty({
@@ -62,5 +63,10 @@ import {
     checkNickNameUpdate() {
       this.nickname = this.nickname!.toLowerCase().replaceAll(" ", "_") + this.age;
     }
-  }
-  
+    @OneToMany(() => Ticket, ticket => ticket.event)
+    tickets: Ticket[];
+
+
+
+
+}
