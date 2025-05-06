@@ -12,22 +12,17 @@ export class SeedService {
 
 
 async runSeed() {
-    await this.insertNewStudents();
+ 
     return 'SEED EXECUTED';
   }
 
-async insertNewStudents(){
-  await this.studentService.deleteAllStudents();
+// async insertNewStudents(){
+//   await this.studentService.deleteAllStudents();
 
-  const students = initialData.students;
+//   const students = initialData.students;
 
-  const insertPromises: Promise<Student | undefined>[] = [];
 
-  students.forEach(student => {
-    insertPromises.push(this.studentService.create(student))
-  });
-
-  await Promise.all(insertPromises);
+//   await Promise.all(insertPromises);
 
   return true;
 }

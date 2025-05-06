@@ -1,5 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Event } from './entities/event.entity';
+import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { User } from 'src/auth/entities/user.entity';
 import { DataSource, DeepPartial, Repository } from 'typeorm';
 import { CreateEventDto } from './dto/create-event.dto/create-event.dto';
 import { PaginationDto } from 'src/commons/dto/pagination.dto';
@@ -8,12 +13,15 @@ import { UpdateEventDto } from './dto/update-event.dto/update-event.dto';
 
 @Injectable()
 export class EventService {
-    private logger = new Logger('EventService');
-    constructor(
-        @InjectRepository(Event)
-        private readonly eventRepository: Repository<Event>,
-        private readonly dataSource: DataSource
-    ){}
+  private readonly logger = new Logger('EventService');
+
+  constructor(
+    @InjectRepository(Event)
+    private readonly eventRepository: Repository<Event>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+
+  ) {}
 
     async create(createEventDto: CreateEventDto) {
         try{

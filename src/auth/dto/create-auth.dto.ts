@@ -28,5 +28,9 @@ export class CreateAuthDto {
 
     @ApiProperty()
     @IsString()
-    fullName: string;
+    name: string;
+
+    @ApiProperty()
+    @IsString()
+    lastname: string;
 }
