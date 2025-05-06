@@ -6,8 +6,7 @@ import {
   OneToMany,
   JoinColumn
 } from "typeorm";
-import { Student } from "../../students/entities/student.entity";
-import { Ticket } from "src/tickets/entities/ticket.entity";
+import { Ticket } from "src/ticket/entities/ticket.entity";
 import { ApiProperty } from "@nestjs/swagger";
 
 @Entity('event')

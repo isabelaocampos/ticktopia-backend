@@ -1,15 +1,13 @@
-import { Injectable, Logger, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Event } from './entities/event.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { User } from 'src/auth/entities/user.entity';
 import { DataSource, DeepPartial, Repository } from 'typeorm';
-import { CreateEventDto } from './dto/create-event.dto/create-event.dto';
+// Removed duplicate import of CreateEventDto
 import { PaginationDto } from 'src/commons/dto/pagination.dto';
 import { isUUID } from 'class-validator';
-import { UpdateEventDto } from './dto/update-event.dto/update-event.dto';
 
 @Injectable()
 export class EventService {

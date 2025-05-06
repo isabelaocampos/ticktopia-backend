@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { StudentsService } from '../students/students.service';
 import { initialData } from './data/seed-data';
 import { Student } from '../students/entities/student.entity';
 import { EventService } from 'src/event/event.service';
@@ -7,8 +6,7 @@ import { EventService } from 'src/event/event.service';
 @Injectable()
 export class SeedService {
 
-  constructor(private readonly studentService: StudentsService,
-              private readonly eventService: EventService){}
+  constructor(private readonly eventService: EventService){}
 
 
 async runSeed() {
@@ -24,8 +22,8 @@ async runSeed() {
 
 //   await Promise.all(insertPromises);
 
-  return true;
-}
+//  return true;
+//}
 
 async insertNewEvents(){
   await this.eventService.deleteAllEvents();

@@ -1,4 +1,3 @@
-import { Grade } from "src/students/entities/grade.entity";
 
 interface SeedStudent{
 
@@ -8,7 +7,6 @@ interface SeedStudent{
         subjects: string[];
         gender: 'Male' | 'Female' | 'Other';
         nickname?:string;
-        grades: Grade[];
 }
 
 interface SeedEvent {
