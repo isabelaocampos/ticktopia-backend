@@ -41,7 +41,7 @@ export class EventService {
     async findOne(term: string) {
         let event: Event | null;
         if(isUUID(term)){
-            event = await this.eventRepository.findOneBy({ idEvent: term });
+            event = await this.eventRepository.findOneBy({ id: term });
         }else{
             const queryBuilder = this.eventRepository.createQueryBuilder('event');
             event = await queryBuilder.where('UPPER(name)=:name or nickname=:nickname',{
