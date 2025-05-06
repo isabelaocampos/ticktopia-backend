@@ -1,4 +1,6 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Event } from "src/event/entities/event.entity";
+import { Ticket } from "src/ticket/entities/ticket.entity";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
 export class User {
@@ -21,6 +23,13 @@ export class User {
 
     @Column('bool', { default: true })
     isActive: boolean;
+
+    @OneToMany(() => Event, (event) => event.user)
+    events: Event[];
+
+    @OneToMany(() => Ticket, (ticket) => ticket.user)
+    tickets: Ticket[];
+
 
     @Column('text',{
         array: true,
