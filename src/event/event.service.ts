@@ -1,68 +1,80 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import { CreateEventDto } from './dto/create-event.dto/create-event.dto';
-import { PaginationDto } from 'src/commons/dto/pagination.dto';
-import { isUUID } from 'class-validator';
+import { Repository } from 'typeorm';
+import { Event } from './entities/event.entity';
+import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class EventService {
-    private logger = new Logger('EventService');
-    constructor(
-        @InjectRepository(Event)
-        private readonly eventRepository: Repository<Event>,
-        private readonly dataSource: DataSource
-    ){}
+  private readonly logger = new Logger('EventService');
 
-    async create(createEventDto: CreateEventDto) {
-        try{
-            const event = this.eventRepository.create(createEventDto);
-            await this.eventRepository.save(event);
-            return event;
-        }catch(error){
-            this.logger.error(error.detail);
-            this.handleExceptions(error);
-        }
-    }
+  constructor(
+    @InjectRepository(Event)
+    private readonly eventRepository: Repository<Event>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
 
-    async findAll(paginationDto: PaginationDto) {
-        try{
-            const {limit=10, offset=0 } = paginationDto;
-            return await this.eventRepository.find({
-                take: limit,
-                skip: offset
-            });
-        }catch(error){
-            this.handleExceptions(error);
-        }
-    }
+  ) {}
 
-    async findOne(term: string) {
-        let event: Event | null;
-
-        if(isUUID(term)){
-            event = await this.eventRepository.findOneBy({ idEvent: term });
-        }else{
-            const queryBuilder = this.eventRepository.createQueryBuilder('event');
-            event = await queryBuilder.where('UPPER(name)=:name or nickname=:nickname',{
-                name: term.toUpperCase(),
-                nickname: term
-            }).getOne();
-        }
-
-        if(!event)
-            throw new NotFoundException(`Event with id ${term} not found`);
-
-        return event;
-    }
-
-    
-
-    private handleExceptions(error: any){
-        if(error.code === "23505")
-          throw new BadRequestException(error.detail);
-    
-        this.logger.error(error.detail);
-        throw new InternalServerErrorException('Unspected error, check your server');
+  async create(createEventDto: CreateEventDto) {
+    try {
+      const user = await this.userRepository.findOneBy({ id: createEventDto.userId });
+      if (!user) {
+        throw new NotFoundException('User not found');
       }
+      const newEvent = this.eventRepository.create(createEventDto);
+      await this.eventRepository.save({...newEvent, user});
+      return newEvent;
+    } catch (error) {
+      this.logger.error('Error creating event', error.stack);
+      throw new InternalServerErrorException('Error creating event');
+    }
+  }
+
+  async findAll() {
+    try {
+      const events = await this.eventRepository.find();
+      return events;
+    } catch (error) {
+      this.logger.error('Error fetching events', error.stack);
+      throw new InternalServerErrorException('Error fetching events');
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      const event = await this.eventRepository.findOne({ where: { id: id } });
+      return event;
+    } catch (error) {
+      this.logger.error(`Error fetching event with ID ${id}`, error.stack);
+      throw new NotFoundException(`Event with ID ${id} not found`);
+    }
+  }
+
+  async update(id: string, updateEventDto: UpdateEventDto) {
+    try {
+      await this.eventRepository.update(id, updateEventDto);
+      const updatedEvent = await this.findOne(id); // Re-fetch the updated event
+      return updatedEvent;
+    } catch (error) {
+      this.logger.error(`Error updating event with ID ${id}`, error.stack);
+      throw new InternalServerErrorException('Error updating event');
+    }
+  }
+
+  async remove(id: string) {
+    try {
+      const eventToRemove = await this.findOne(id);
+      if (!eventToRemove) {
+        throw new NotFoundException(`Event with ID ${id} not found`);
+      }
+      await this.eventRepository.remove(eventToRemove);
+      return eventToRemove;
+    } catch (error) {
+      this.logger.error(`Error deleting event with ID ${id}`, error.stack);
+      throw new InternalServerErrorException('Error deleting event');
+    }
+  }
 }
