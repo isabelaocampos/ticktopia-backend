@@ -5,6 +5,8 @@ import { StudentsModule } from './students/students.module';
 import { CommonsModule } from './commons/commons.module';
 import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
+import { TicketsService } from './tickets/tickets.service';
+import { TicketsController } from './tickets/tickets.controller';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { AuthModule } from './auth/auth.module';
     SeedModule,
     AuthModule
   ],
-  controllers: [],
-  providers: [],
+  controllers: [TicketsController],
+  providers: [TicketsService],
 })
 export class AppModule {}
