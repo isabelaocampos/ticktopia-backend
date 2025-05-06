@@ -8,6 +8,8 @@ import {
 } from "typeorm";
 import { Ticket } from "src/ticket/entities/ticket.entity";
 import { ApiProperty } from "@nestjs/swagger";
+import { User } from "src/auth/entities/user.entity";
+import { Presentation } from "src/presentation/entities/presentation.entity";
 
 @Entity('event')
 export class Event {
@@ -39,10 +41,13 @@ export class Event {
   @Column({ type: 'int' })
   availableTickets: number;
 
-  @ManyToOne(() => Student, user => user.events, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.events, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'User_idUser' })
-  user: Student;
+  user: User;
 
-  @OneToMany(() => Ticket, ticket => ticket.event)
+  @OneToMany(() => Ticket, ticket => ticket.event, { cascade: true })
   tickets: Ticket[];
+
+  @OneToMany(() => Presentation, presentation => presentation.event)
+  presentations: Presentation[];
 }

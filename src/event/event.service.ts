@@ -23,7 +23,7 @@ export class EventService {
 
     async create(createEventDto: CreateEventDto) {
         try{
-            const event = this.eventRepository.create(createEventDto as DeepPartial<Event>);
+            const event = this.eventRepository.create(createEventDto);
             await this.eventRepository.save(event);
             return event;
         }catch(error){
@@ -65,7 +65,7 @@ export class EventService {
     async update(id: string, updateEventDto: UpdateEventDto) {
         try{
             const event = await this.findOne(id);
-            this.eventRepository.merge(event, updateEventDto as DeepPartial<Event>);
+            this.eventRepository.merge(event, updateEventDto);
             return await this.eventRepository.save(event);
         }catch(error){
             this.logger.error(error.detail);

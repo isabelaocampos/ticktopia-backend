@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { User } from "src/auth/entities/user.entity";
 import { Presentation } from "src/presentation/entities/presentation.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Event } from "src/event/entities/event.entity";
 
 @Entity()
 export class Ticket {
@@ -37,5 +38,9 @@ export class Ticket {
     )
     presentation: Presentation;
 
+    @ManyToOne(() => Event, event => event.tickets, { onDelete: 'CASCADE' })
+    event: Event;
 
+    @Column('uuid')
+    eventId: string;
 }

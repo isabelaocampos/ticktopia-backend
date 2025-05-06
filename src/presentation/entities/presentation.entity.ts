@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Event } from "src/event/entities/event.entity";
 import { Ticket } from "src/ticket/entities/ticket.entity";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Presentation {
@@ -17,12 +17,10 @@ export class Presentation {
     place: string;
 
 
-    @ManyToOne(
-        () => Event,
-        (event) => event.presentations,
-        { cascade: true, eager: true,  nullable: false}
-    )
+    @ManyToOne(() => Event, event => event.presentations, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'Event_idevent' })
     event: Event;
+
 
     @ApiProperty({
         description: 'Capacity of this presentation',
@@ -61,6 +59,7 @@ export class Presentation {
     tickets: Ticket[];
 
 }
+
 
 
 
