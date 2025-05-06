@@ -7,6 +7,9 @@ import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
 import { TicketsService } from './tickets/tickets.service';
 import { TicketsController } from './tickets/tickets.controller';
+import { EventController } from './event/event.controller';
+import { EventService } from './event/event.service';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -24,9 +27,11 @@ import { TicketsController } from './tickets/tickets.controller';
     StudentsModule,
     CommonsModule,
     SeedModule,
-    AuthModule
+    AuthModule,
+    EventModule
   ],
-  controllers: [TicketsController],
-  providers: [TicketsService],
+  controllers: [TicketsController, EventController],
+  providers: [TicketsService, EventService],
+
 })
 export class AppModule {}
