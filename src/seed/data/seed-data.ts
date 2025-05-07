@@ -1,6 +1,5 @@
 
-interface SeedStudent {
-
+interface SeedUser {
     email: string;
     password: string;
     name: string;
@@ -19,7 +18,7 @@ interface SeedEvent {
 }
 
 interface SeedData {
-    users: SeedStudent[];
+    users: SeedUser[];
     events: SeedEvent[];
 }
 

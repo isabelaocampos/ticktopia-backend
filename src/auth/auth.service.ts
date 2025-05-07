@@ -83,10 +83,10 @@ export class AuthService {
   }
   async deleteAllUsers(): Promise<{ message: string }> {
     try {
-      await this.userRepository.clear(); 
-      return { message: 'All users have been deleted successfully' };
+      await this.userRepository.delete({});  // Ahora puedes eliminar los usuarios
+      return { message: 'All users and their events have been deleted successfully' };
     } catch (error) {
-      this.logger.error('Failed to delete all users', error);
+      this.logger.error('Failed to delete all users', error.stack);
       throw new InternalServerErrorException('Could not delete users');
     }
   }
