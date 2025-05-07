@@ -6,7 +6,6 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { User } from '../auth/entities/user.entity';
 import { DataSource, DeepPartial, Repository } from 'typeorm';
 // Removed duplicate import of CreateEventDto
-import { PaginationDto } from 'src/commons/dto/pagination.dto';
 import { isUUID } from 'class-validator';
 
 @Injectable()
@@ -32,9 +31,8 @@ export class EventService {
         }
     }
 
-    async findAll(paginationDto: PaginationDto) {
+    async findAll(limit = 10, offset = 0) {
         try{
-            const {limit=10, offset=0 } = paginationDto;
             return await this.eventRepository.find({
                 take: limit,
                 skip: offset
@@ -96,11 +94,11 @@ export class EventService {
         }
     }
 
-    private handleExceptions(error: any){
-        if(error.code === "23505")
+    private handleExceptions(error: any): never {
+        if (error.code === "23505")
           throw new BadRequestException(error.detail);
-    
+      
         this.logger.error(error.detail);
-        throw new InternalServerErrorException('Unspected error, check your server');
+        throw new InternalServerErrorException('Unexpected error, check your server');
       }
 }

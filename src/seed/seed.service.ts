@@ -25,20 +25,20 @@ export class SeedService {
     });
     await Promise.all(insertPromises);
 
-//  return true;
-//}
+    return true;
+  }
 
-async insertNewEvents(){
-  await this.eventService.deleteAllEvents();
-  const events = initialData.events;
-  const insertPromises: Promise<Event | undefined>[] = [];
-  events.forEach(event => {
-    insertPromises.push(this.eventService.create(event))
-  });
-  await Promise.all(insertPromises);
-  return true;
+  async insertNewEvents() {
+    await this.eventService.deleteAllEvents;
+    const events = initialData.events;
+    const insertPromises: Promise<Event>[] = [];
+    events.forEach(event => {
+      insertPromises.push(this.eventService.create(event))
+    });
+    await Promise.all(insertPromises);
+
+    return true;
+  }
 
 }
 
-}
-}
