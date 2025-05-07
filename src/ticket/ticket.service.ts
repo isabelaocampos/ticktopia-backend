@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
-import { User } from 'src/auth/entities/user.entity';
-import { Presentation } from 'src/presentation/entities/presentation.entity';
+import { User } from '../auth/entities/user.entity';
+import { Presentation } from '../presentation/entities/presentation.entity';
 
 @Injectable()
 export class TicketService {

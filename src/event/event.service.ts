@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Event } from './entities/event.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { User } from 'src/auth/entities/user.entity';
+import { User } from '../auth/entities/user.entity';
 
 @Injectable()
 export class EventService {

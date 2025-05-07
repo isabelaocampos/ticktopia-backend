@@ -2,9 +2,9 @@ import { PassportModule } from "@nestjs/passport";
 import { TestingModule, Test } from "@nestjs/testing";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { LoginUserDto } from "./dto/login-user.dto";
 import { User } from "./entities/user.entity";
 import { CreateAuthDto } from "./dto/create-auth.dto";
+import { LoginUserDto } from './dto/Login-user.dto';
 
 describe('AuthController', () => {
     let authController: AuthController;
@@ -39,7 +39,8 @@ describe('AuthController', () => {
       const dto: CreateAuthDto = {
         email: 'test@google.com',
         password: 'Abc123',
-        fullName: 'Test User',
+        name: 'Test User',
+        lastname: 'Test',
       };
   
       await authController.create(dto);
