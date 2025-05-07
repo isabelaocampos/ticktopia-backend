@@ -15,8 +15,8 @@ async function bootstrap() {
   )
 
   const config = new DocumentBuilder()
-    .setTitle('Students RESTFul API')
-    .setDescription('Students management endpoints')
+    .setTitle('Ticktopia REST api')
+    .setDescription('Events, Tickets and Presentation managment api')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
