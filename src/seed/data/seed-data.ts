@@ -1,6 +1,5 @@
 
-interface SeedStudent {
-
+interface SeedUser {
     email: string;
     password: string;
     name: string;
@@ -8,8 +7,16 @@ interface SeedStudent {
     roles?: string[]
 }
 
+interface SeedEvent {
+    name: string;
+    bannerPhotoUrl: string;
+    isPublic: boolean;
+}
+
+
 interface SeedData {
-    users: SeedStudent[];
+    users: SeedUser[];
+    events: SeedEvent[];
 }
 
 export const initialData: SeedData = {
@@ -87,6 +94,32 @@ export const initialData: SeedData = {
             roles: ["admin"]
 
         },
-
+    ],
+    events: [
+        {
+            name: "ANDRÉS CALAMARO: AGENDA 1999 TOUR",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746554872/ltavyxu115tlpcvhjews.jpg",
+            isPublic: true,
+        },
+        {
+            name: "Debí Tirar Más Fotos World Tour",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746655189/avljgk2jxugrtoyy1qmv.jpg",
+            isPublic: true,
+        },
+        {
+            name: "CAMILO | NUESTRO LUGAR FELIZ TOUR - CALI",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746655493/u5dhbldu2ob7wjherfxf.jpg",
+            isPublic: true,
+        },
+        {
+            name: "REY RUIZ | SIEMPRE CONTIGO",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746655833/wixrcw9ay0y4ilgzleqe.jpg",
+            isPublic: true,
+        },
+        {
+            name: "TRUENO",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746656053/gwxuquxh1omlmifzh9lk.jpg",
+            isPublic: true,
+        }
     ]
 }
