@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from './entities/event.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { User } from 'src/auth/entities/user.entity';
+import { User } from '../auth/entities/user.entity';
 import { DataSource, DeepPartial, Repository } from 'typeorm';
 // Removed duplicate import of CreateEventDto
 import { PaginationDto } from 'src/commons/dto/pagination.dto';

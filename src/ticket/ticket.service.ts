@@ -11,8 +11,8 @@ import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { BuyTicketDto } from './dto/buy-ticket.dto';
 import { CancelTicketDto } from './dto/cancel-ticket.dto';
-import { User } from 'src/auth/entities/user.entity';
-import { Presentation } from 'src/presentation/entities/presentation.entity';
+import { User } from '../auth/entities/user.entity';
+import { Presentation } from '../presentation/entities/presentation.entity';
 
 @Injectable()
 export class TicketService {

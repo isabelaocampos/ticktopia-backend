@@ -8,8 +8,8 @@ import {
 } from "typeorm";
 import { Ticket } from "src/ticket/entities/ticket.entity";
 import { ApiProperty } from "@nestjs/swagger";
-import { User } from "src/auth/entities/user.entity";
-import { Presentation } from "src/presentation/entities/presentation.entity";
+import { User } from "../../auth/entities/user.entity";
+import { Presentation } from "../../presentation/entities/presentation.entity";
 
 @Entity('event')
 export class Event {
