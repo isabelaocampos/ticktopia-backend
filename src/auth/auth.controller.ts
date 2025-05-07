@@ -22,8 +22,8 @@ export class AuthController {
 
   @Auth(ValidRoles.admin)
   @Post('register/event-manager')
-  createAdmin(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  createEventManager(@Body() createAuthDto: CreateAuthDto) {
+    return this.authService.create({...createAuthDto, roles: ['event-manager']});
   }
 
   @Post('login')
