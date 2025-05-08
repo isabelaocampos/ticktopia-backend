@@ -8,7 +8,7 @@ jest.mock('@nestjs/common', () => ({
   
   describe('RoleProtected Decorator', () => {
     it('should set metadata with the correct roles', () => {
-      const roles = [ValidRoles.admin, ValidRoles.teacher];
+      const roles = [ValidRoles.admin, ValidRoles.client];
   
       const result = RoleProtected(...roles);
   
