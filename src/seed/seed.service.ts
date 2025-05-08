@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { initialData } from './data/seed-data';
-import { AuthService } from 'src/auth/auth.service';
-import { User } from 'src/auth/entities/user.entity';
-import { EventService } from 'src/event/event.service';
-import { Event } from 'src/event/entities/event.entity';
-import { Presentation } from 'src/presentation/entities/presentation.entity';
-import { PresentationService } from 'src/presentation/presentation.service';
-import { TicketService } from 'src/ticket/ticket.service';
-import { Ticket } from 'src/ticket/entities/ticket.entity';
+import { AuthService } from '../auth/auth.service';
+import { User } from '../auth/entities/user.entity';
+import { EventService } from '../event/event.service';
+import { Event } from '../event/entities/event.entity';
+import { Presentation } from '../presentation/entities/presentation.entity';
+import { PresentationService } from '../presentation/presentation.service';
+import { TicketService } from '../ticket/ticket.service';
+import { Ticket } from '../ticket/entities/ticket.entity';
 import { ValidRoles } from '../auth/enums/valid-roles.enum';
 
 @Injectable()
