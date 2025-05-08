@@ -24,7 +24,7 @@ export class CreatePresentationDto {
     })
     @IsDateString()
     @IsNotEmpty()
-    openDate: Date;
+    openDate: string;
 
     @ApiProperty({
         example: '2025-05-06T10:00:00Z',
@@ -32,7 +32,7 @@ export class CreatePresentationDto {
     })
     @IsDateString()
     @IsNotEmpty()
-    startDate: Date;
+    startDate: string;
 
     @ApiProperty({
         example: 6.25184,
@@ -64,7 +64,7 @@ export class CreatePresentationDto {
     })
     @IsDateString()
     @IsNotEmpty()
-    ticketAvailabilityDate: Date;
+    ticketAvailabilityDate: string;
 
     @ApiProperty({
         example: '2025-04-25T00:00:00Z',
@@ -72,7 +72,7 @@ export class CreatePresentationDto {
     })
     @IsDateString()
     @IsNotEmpty()
-    ticketSaleAvailabilityDate: Date;
+    ticketSaleAvailabilityDate: string;
 
     @ApiProperty({
         example: 'Medellín',
@@ -88,5 +88,5 @@ export class CreatePresentationDto {
     })
     @IsString()
     @IsNotEmpty()
-    eventId: string
+    eventId: string;
 }

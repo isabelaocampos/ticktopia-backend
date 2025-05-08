@@ -15,7 +15,7 @@ export class TicketService {
     @InjectRepository(Presentation) private presentationRepo: Repository<Presentation>,
   ) {}
 
-  async create(dto: CreateTicketDto) {
+  async create(dto: CreateTicketDto & {isRedeemed?: boolean, isActive?: boolean} ) {
     const user = await this.userRepo.findOne({ where: { id: dto.userId } });
     const presentation = await this.presentationRepo.findOne({ where: { idPresentation: dto.presentationId } });
 
@@ -25,8 +25,8 @@ export class TicketService {
 
     const ticket = this.ticketRepo.create({
       buyDate: new Date(),
-      isRedeemed: dto.isRedeemed,
-      isActive: dto.isActive,
+      isRedeemed: dto.isRedeemed ?? false,
+      isActive: dto.isActive ?? false,
       user,
       presentation,
     });
@@ -50,6 +50,11 @@ export class TicketService {
     return this.ticketRepo.save(ticket);
   }
 
+
+  async deleteAll() {
+    await this.ticketRepo.delete({});
+  }
+  
   async remove(id: string) {
     const ticket = await this.ticketRepo.findOne({ where: { id } });
     if (!ticket) throw new NotFoundException('Ticket not found');
