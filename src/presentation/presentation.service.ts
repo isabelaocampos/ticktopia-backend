@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Presentation } from './entities/presentation.entity';
 import { CreatePresentationDto } from './dto/create-presentation.dto';
 import { UpdatePresentationDto } from './dto/update-presentation.dto';
-import { Event } from 'src/event/entities/event.entity';
+import { Event } from '../event/entities/event.entity';
 import e from 'express';
 
 @Injectable()

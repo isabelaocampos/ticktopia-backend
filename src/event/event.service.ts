@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Event } from './entities/event.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { User } from 'src/auth/entities/user.entity';
+import { User } from '../auth/entities/user.entity';
 
 @Injectable()
 export class EventService {
@@ -16,7 +16,7 @@ export class EventService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
-  ) {}
+  ) { }
 
   async create(createEventDto: CreateEventDto) {
     try {
@@ -25,7 +25,7 @@ export class EventService {
         throw new NotFoundException('User not found');
       }
       const newEvent = this.eventRepository.create(createEventDto);
-      await this.eventRepository.save({...newEvent, user});
+      await this.eventRepository.save({ ...newEvent, user });
       return newEvent;
     } catch (error) {
       this.logger.error('Error creating event', error.stack);
@@ -63,6 +63,21 @@ export class EventService {
       throw new InternalServerErrorException('Error updating event');
     }
   }
+
+  async deleteAll() {
+    try {
+      const events = await this.eventRepository.find();
+      if (events.length === 0) {
+        return { message: 'No events to delete' };
+      }
+      await this.eventRepository.remove(events);
+      return { message: `${events.length} event(s) deleted successfully` };
+    } catch (error) {
+      this.logger.error('Error deleting all events', error.stack);
+      throw new InternalServerErrorException('Error deleting all events');
+    }
+  }
+
 
   async remove(id: string) {
     try {

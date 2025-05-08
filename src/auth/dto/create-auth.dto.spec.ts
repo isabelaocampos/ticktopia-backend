@@ -7,7 +7,8 @@ describe('CreateUserDTO', () => {
   
       dto.email = 'gus@mail.com';
       dto.password = 'Abc123';
-      dto.fullName = 'Gus Gonzalez';
+      dto.name = 'Gustavos';
+      dto.lastname = "Gonzales"
   
       const errors = await validate(dto);
   
@@ -19,8 +20,8 @@ describe('CreateUserDTO', () => {
   
       dto.email = 'gus@mail.com';
       dto.password = 'abc123';
-      dto.fullName = 'Gus Gonzalez';
-  
+      dto.name = 'Gus';
+      dto.lastname = "Gonzales"
       const errors = await validate(dto);
   
       const passwordError = errors.find((error) => error.property === 'password');

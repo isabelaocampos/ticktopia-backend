@@ -16,11 +16,11 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService
-  ){}
+  ) { }
 
-  async create(createAuthDto: CreateAuthDto) {
-    const {password, ...userData } = createAuthDto;
-    try{
+  async create(createUserDto: CreateAuthDto & {roles?: string[]}) {
+    const { password, ...userData } = createUserDto;
+    try {
       const user = this.userRepository.create({
         ...userData,
         password: bcrypt.hashSync(password, 10)
@@ -29,70 +29,80 @@ export class AuthService {
       delete user.password;
 
       return {
-        user:user,
-        token: this.getJwtToken({id: user.id})
+        user: user,
+        token: this.getJwtToken({ id: user.id })
       };
 
 
-    }catch(error){
-      console.log("error login",error);
+    } catch (error) {
+      console.log("error login", error);
       this.handleExceptions(error);
     }
   }
 
   async createEventManger(createAuthDto: CreateAuthDto) {
-    const {password, ...userData } = createAuthDto;
-    try{
+    const { password, ...userData } = createAuthDto;
+    try {
       const user = this.userRepository.create({
-        ...{...userData, roles: ["event-manaeger"]},
+        ...{ ...userData, roles: ["event-manaeger"] },
         password: bcrypt.hashSync(password, 10)
       });
       await this.userRepository.save(user);
       delete user.password;
 
       return {
-        user:user,
-        token: this.getJwtToken({id: user.id})
+        user: user,
+        token: this.getJwtToken({ id: user.id })
       };
 
 
-    }catch(error){
-      console.log("error login",error);
+    } catch (error) {
+      console.log("error login", error);
       this.handleExceptions(error);
     }
   }
 
-  async login(loginUserDto: LoginUserDto){
+  async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
     const user = await this.userRepository.findOne({
-      where: {email},
-      select: { email: true, password: true, id:true}
+      where: { email },
+      select: { email: true, password: true, id: true }
     });
 
-    if(!user) throw new UnauthorizedException(`User with email ${email} not found`);
+    if (!user) throw new UnauthorizedException(`User with email ${email} not found`);
 
-    if(!bcrypt.compareSync(password, user.password!))
+    if (!bcrypt.compareSync(password, user.password!))
       throw new UnauthorizedException(`Email or password incorrect`)
 
     delete user.password;
 
     return {
-      user:user,
-      token: this.getJwtToken({id: user.id})
+      user: user,
+      token: this.getJwtToken({ id: user.id })
+    }
+  }
+  async deleteAllUsers(): Promise<{ message: string }> {
+    try {
+      await this.userRepository.delete({});  // Ahora puedes eliminar los usuarios
+      return { message: 'All users and their events have been deleted successfully' };
+    } catch (error) {
+      this.logger.error('Failed to delete all users', error.stack);
+      throw new InternalServerErrorException('Could not delete users');
     }
   }
 
-  private getJwtToken(payload: JwtPayload){
+
+  private getJwtToken(payload: JwtPayload) {
     const token = this.jwtService.sign(payload);
     return token;
   }
 
-  private handleExceptions(error: any){
-      if(error.code === "23505")
-        throw new BadRequestException(error.detail);
-  
-      this.logger.error(error.detail);
-      throw new InternalServerErrorException('Unspected error, check your server logs');
-    }
+  private handleExceptions(error: any) {
+    if (error.code === "23505")
+      throw new BadRequestException(error.detail);
+
+    this.logger.error(error.detail);
+    throw new InternalServerErrorException('Unspected error, check your server logs');
+  }
 
 }

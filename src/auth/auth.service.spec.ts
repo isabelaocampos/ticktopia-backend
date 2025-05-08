@@ -4,10 +4,10 @@ import { TestingModule, Test } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { AuthService } from "./auth.service";
-import { LoginUserDto } from "./dto/login-user.dto";
 import { User } from "./entities/user.entity";
 import { CreateAuthDto } from "./dto/create-auth.dto";
 import * as bcrypt from 'bcrypt';
+import { LoginUserDto } from './dto/Login-user.dto';
 
 describe('AuthService', () => {
     let authService: AuthService;
@@ -51,12 +51,14 @@ describe('AuthService', () => {
       const dto: CreateAuthDto = {
         email: 'test@google.com',
         password: 'Abc123',
-        fullName: 'Test User',
+        name: 'Test User',
+        lastname:'Last'
       };
   
       const user = {
         email: dto.email,
-        fullName: dto.fullName,
+        name: dto.name,
+        lastname: dto.lastname,
         id: '1',
         isActive: true,
         roles: ['user'],
@@ -72,7 +74,8 @@ describe('AuthService', () => {
       expect(result).toEqual({
         user: {
           email: 'test@google.com',
-          fullName: 'Test User',
+          name: 'Test User',
+          lastname: "Last",
           id: '1',
           isActive: true,
           roles: ['user'],
@@ -85,7 +88,8 @@ describe('AuthService', () => {
       const dto: CreateAuthDto = {
         email: 'test@google.com',
         password: 'Abc123',
-        fullName: 'Test User',
+        name: 'Test User',
+        lastname: "Test pass"
       };
   
       jest
