@@ -4,14 +4,6 @@ import { Transform } from 'class-transformer';
 
 export class CreateTicketDto {
 
-  @ApiProperty({ example: false, description: 'Whether the ticket was redeemed' })
-  @IsBoolean()
-  isRedeemed: boolean;
-
-  @ApiProperty({ example: true, description: 'Whether the ticket is active' })
-  @IsBoolean()
-  isActive: boolean;
-
   @ApiProperty({
     example: '5f6d3f57-1dd3-41fd-a7a7-010203040506',
     description: 'ID of the user who owns the ticket',

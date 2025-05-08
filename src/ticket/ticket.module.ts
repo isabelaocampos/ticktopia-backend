@@ -10,6 +10,7 @@ import { Ticket } from './entities/ticket.entity';
   controllers: [TicketController],
   providers: [TicketService],
   imports: [TypeOrmModule.forFeature([User, Presentation, Ticket]),
-  ]
+  ],
+  exports: [TicketService]
 })
 export class TicketModule { }

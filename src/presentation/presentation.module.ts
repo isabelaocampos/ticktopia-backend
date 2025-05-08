@@ -9,6 +9,7 @@ import { Event } from '../event/entities/event.entity';
   controllers: [PresentationController],
   providers: [PresentationService],
   imports: [TypeOrmModule.forFeature([Presentation, Event]),
-  ]
+  ],
+  exports: [PresentationService]
 })
 export class PresentationModule { }

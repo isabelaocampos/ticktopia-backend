@@ -78,4 +78,15 @@ export class PresentationService {
       throw new InternalServerErrorException('Error deleting presentation');
     }
   }
+
+  async deleteAll(): Promise<{ message: string }> {
+    try {
+      await this.presentationRepository.delete({}); // TRUNCATE equivalent
+      return { message: 'All presentations have been deleted successfully' };
+    } catch (error) {
+      this.logger.error('Error deleting all presentations', error.stack);
+      throw new InternalServerErrorException('Error deleting all presentations');
+    }
+  }
+  
 }
