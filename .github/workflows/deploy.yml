@@ -26,3 +26,15 @@ jobs:
       - name: Push Docker Image
         run: |
           docker push elkofix/ticktopia:latest
+
+      - name: Delete docker container and update image
+        run: |
+          chmod 400 ./backend-ticktopia.pem
+
+          ssh -o StrictHostKeyChecking=no -i ./backend-ticktopia.pem ubuntu@54.209.246.34 << 'EOF'
+          #!/bin/bash
+          set -e
+          docker pull elkofix/ticktopia:latest
+          docker stop ticktopia-backend
+          docker rm ticktopia-backend
+          docker run -d -p 1337:3000 --name ticktopia-backend elkofix/ticktopia:latest
