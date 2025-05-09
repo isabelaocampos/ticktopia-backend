@@ -30,7 +30,7 @@ export class Event {
   bannerPhotoUrl: string;
 
   @ApiProperty()
-  @Column({ type: 'tinyint' })
+  @Column({ type: 'boolean' })
   isPublic: boolean;
 
   @ApiProperty()

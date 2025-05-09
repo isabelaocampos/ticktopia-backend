@@ -30,9 +30,7 @@ import { TicketModule } from './ticket/ticket.module';
     EventModule,
     PresentationModule,
     TicketModule
-  ],
-  controllers: [TicketController, EventController],
-  providers: [TicketService, EventService],
+  ]
 
 })
 export class AppModule {}

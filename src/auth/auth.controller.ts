@@ -8,7 +8,7 @@ import { Auth } from './decorators/auth.decorator';
 import { RawHeaders } from './decorators/raw-headers.decorator';
 import { IncomingHttpHeaders } from 'http';
 import { ApiTags } from '@nestjs/swagger';
-import { LoginUserDto } from './dto/Login-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @ApiTags('Auth')
 @Controller('auth')

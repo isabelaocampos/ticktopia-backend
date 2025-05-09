@@ -17,20 +17,25 @@ import { Presentation } from '../presentation/entities/presentation.entity';
 @Injectable()
 export class TicketService {
   constructor(
-    @InjectRepository(Ticket) private ticketRepo: Repository<Ticket>,
-    @InjectRepository(User) private userRepo: Repository<User>,
-    @InjectRepository(Presentation) private presentationRepo: Repository<Presentation>,
+    @InjectRepository(Ticket)
+    private ticketRepository: Repository<Ticket>,
+
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+
+    @InjectRepository(Presentation)
+    private presentationRepository: Repository<Presentation>
   ) {}
 
   async create(dto: CreateTicketDto) {
-    const user = await this.userRepo.findOne({ where: { id: dto.userId } });
-    const presentation = await this.presentationRepo.findOne({ where: { idPresentation: dto.presentationId } });
+    const user = await this.userRepository.findOne({ where: { id: dto.userId } });
+    const presentation = await this.presentationRepository.findOne({ where: { idPresentation: dto.presentationId } });
 
     if (!user || !presentation) {
       throw new NotFoundException('User or Presentation not found');
     }
 
-    const ticket = this.ticketRepo.create({
+    const ticket = this.ticketRepository.create({
       buyDate: new Date(),
       isRedeemed: dto.isRedeemed,
       isActive: dto.isActive,
@@ -38,34 +43,34 @@ export class TicketService {
       presentation,
     });
 
-    return this.ticketRepo.save(ticket);
+    return this.ticketRepository.save(ticket);
   }
 
   findAll() {
-    return this.ticketRepo.find();
+    return this.ticketRepository.find();
   }
 
   async findOne(id: string) {
-    const ticket = await this.ticketRepo.findOne({ where: { id } });
+    const ticket = await this.ticketRepository.findOne({ where: { id } });
     if (!ticket) throw new NotFoundException('Ticket not found');
     return ticket;
   }
 
   async update(id: string, dto: UpdateTicketDto) {
-    const ticket = await this.ticketRepo.preload({ id, ...dto });
+    const ticket = await this.ticketRepository.preload({ id, ...dto });
     if (!ticket) throw new NotFoundException('Ticket not found');
-    return this.ticketRepo.save(ticket);
+    return this.ticketRepository.save(ticket);
   }
 
   async remove(id: string) {
-    const ticket = await this.ticketRepo.findOne({ where: { id } });
+    const ticket = await this.ticketRepository.findOne({ where: { id } });
     if (!ticket) throw new NotFoundException('Ticket not found');
-    return this.ticketRepo.remove(ticket);
+    return this.ticketRepository.remove(ticket);
   }
 
   async buyTicket(userId: string, dto: BuyTicketDto) {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-    const presentation = await this.presentationRepo.findOne({
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const presentation = await this.presentationRepository.findOne({
       where: { idPresentation: dto.presentationId },
       relations: ['tickets'], // Asegúrate que tengas esta relación en tu entidad
     });
@@ -83,7 +88,7 @@ export class TicketService {
     }
 
     // Verifica si el usuario ya tiene un ticket activo para esa presentación
-    const existingTicket = await this.ticketRepo.findOne({
+    const existingTicket = await this.ticketRepository.findOne({
       where: {
         user: { id: userId },
         presentation: { idPresentation: dto.presentationId },
@@ -95,7 +100,7 @@ export class TicketService {
       throw new BadRequestException('You already have an active ticket for this presentation');
     }
 
-    const ticket = this.ticketRepo.create({
+    const ticket = this.ticketRepository.create({
       buyDate: new Date(),
       isRedeemed: false,
       isActive: true,
@@ -103,11 +108,11 @@ export class TicketService {
       presentation,
     });
 
-    return this.ticketRepo.save(ticket);
+    return this.ticketRepository.save(ticket);
   }
 
   async cancelTicket(id: string, userId: string, dto: CancelTicketDto) {
-    const ticket = await this.ticketRepo.findOne({
+    const ticket = await this.ticketRepository.findOne({
       where: { id },
       relations: ['user'],
     });
@@ -127,6 +132,6 @@ export class TicketService {
     // (Opcional) Guardar motivo de cancelación en otro campo/log
     console.log(`Ticket ${id} cancelled. Reason: ${dto.reason}`);
 
-    return this.ticketRepo.save(ticket);
+    return this.ticketRepository.save(ticket);
   }
 }
