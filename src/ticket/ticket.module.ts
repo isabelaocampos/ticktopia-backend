@@ -5,8 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../auth/entities/user.entity';
 import { Presentation } from '../presentation/entities/presentation.entity';
 import { Ticket } from './entities/ticket.entity';
-import { PresentationModule } from 'src/presentation/presentation.module';
-import { AuthModule } from 'src/auth/auth.module';
+import { PresentationModule } from '../presentation/presentation.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   controllers: [TicketController],
