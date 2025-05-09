@@ -35,6 +35,15 @@ export class CreatePresentationDto {
     startDate: string;
 
     @ApiProperty({
+        example: 50000,
+        description: 'unit price of each ticket',
+    })
+    @IsNumber()
+    @IsNotEmpty()
+    price: number;
+
+
+    @ApiProperty({
         example: 6.25184,
         description: 'Latitude of the presentation location',
     })

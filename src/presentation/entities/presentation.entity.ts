@@ -20,7 +20,7 @@ export class Presentation {
     @ManyToOne(
         () => Event,
         (event) => event.presentations,
-        { cascade: true, eager: true,  nullable: false}
+        { cascade: true, eager: true, nullable: false }
     )
     event: Event;
 
@@ -32,6 +32,8 @@ export class Presentation {
     @Column({ type: 'int' })
     capacity: number;
 
+    @Column({ type: 'float' })
+    price: number;
 
     @Column({ type: 'timestamp' })
     openDate: Date;
