@@ -3,9 +3,8 @@ import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
-import { PresentationService } from 'src/presentation/presentation.service';
-import { EventService } from 'src/event/event.service';
-import { AuthService } from 'src/auth/auth.service';
+import { PresentationService } from '../presentation/presentation.service';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('tickets')
 export class TicketController {
