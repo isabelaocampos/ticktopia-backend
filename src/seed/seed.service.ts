@@ -30,7 +30,7 @@ export class SeedService {
   }
 
   async insertNewEvents(eventManagerIds: string[]) {
-    await this.eventService.deleteAllEvents();
+    await this.eventService.deleteAll();
     const events = initialData.events;
     const insertPromises: Promise<Event>[] = [];
   
