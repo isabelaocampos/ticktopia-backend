@@ -68,6 +68,7 @@ export class AuthService {
       where: { email },
       select: { email: true, password: true, id: true }
     });
+    console.log(user)
 
     if (!user) throw new UnauthorizedException(`User with email ${email} not found`);
 
