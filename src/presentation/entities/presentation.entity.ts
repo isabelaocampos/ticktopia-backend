@@ -17,8 +17,11 @@ export class Presentation {
     place: string;
 
 
-    @ManyToOne(() => Event, event => event.presentations, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'Event_idevent' })
+    @ManyToOne(
+        () => Event,
+        (event) => event.presentations,
+        { cascade: true, eager: true, nullable: false }
+    )
     event: Event;
 
 
@@ -30,6 +33,8 @@ export class Presentation {
     @Column({ type: 'int' })
     capacity: number;
 
+    @Column({ type: 'float' })
+    price: number;
 
     @Column({ type: 'timestamp' })
     openDate: Date;

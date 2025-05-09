@@ -91,6 +91,22 @@ export class AuthService {
     }
   }
 
+  async findById(id: string) {
+  const user = await this.userRepository.findOne({
+    where: { id },
+    select: {
+      id: true,
+      email: true,
+      roles: true,
+    }
+  });
+
+  if (!user) {
+    throw new NotFoundException(`User with ID ${id} not found`);
+  }
+
+  return user;
+}
 
   private getJwtToken(payload: JwtPayload) {
     const token = this.jwtService.sign(payload);
