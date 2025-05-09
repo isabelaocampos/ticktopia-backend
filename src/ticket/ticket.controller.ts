@@ -1,9 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, InternalServerErrorException } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
-import { BuyTicketDto } from './dto/buy-ticket.dto';
-import { CancelTicketDto } from './dto/cancel-ticket.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { PresentationService } from '../presentation/presentation.service';
 import { AuthService } from '../auth/auth.service';
@@ -12,14 +10,9 @@ import { AuthService } from '../auth/auth.service';
 export class TicketController {
   constructor(private readonly ticketService: TicketService, private readonly presentationService: PresentationService, private readonly userService: AuthService) { }
 
-  @Post('admin')
+  @Post()
   create(@Body() createTicketDto: CreateTicketDto) {
     return this.ticketService.create(createTicketDto);
-  }
-
-  @Post('buy')
-  buyTicket(@Req() req, @Body() dto: BuyTicketDto) {
-    return this.ticketService.buyTicket(req.user.id, dto);
   }
 
   @Post("checkout")
@@ -34,7 +27,7 @@ export class TicketController {
       throw new InternalServerErrorException("User not found")
 
     }
-    const stripeData = await this.ticketService.createCheckoutSession(createTicketDto.quantity, user, presentation,)
+    const stripeData = await this.ticketService.createCheckoutSession(createTicketDto.quantity, user, presentation);
     return stripeData.url;
   }
 
@@ -53,13 +46,8 @@ export class TicketController {
     return this.ticketService.update(id, updateTicketDto);
   }
 
-  @Patch(':id/cancel')
-  cancelTicket(
-  @Param('id') id: string,
-  @Body() dto: CancelTicketDto,
-  @Req() req
-  ) {
-  return this.ticketService.cancelTicket(id, req.user.id, dto);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.ticketService.remove(id);
   }
-
 }
