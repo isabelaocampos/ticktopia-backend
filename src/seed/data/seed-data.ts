@@ -21,6 +21,7 @@ interface SeedPresentation {
     startDate: string;
     latitude: number;
     longitude: number;
+    price: number;
     description: string;
     ticketAvailabilityDate: string;
     ticketSaleAvailabilityDate: string;
@@ -213,7 +214,8 @@ export const initialData: SeedData = {
             description: "A musical event in the main stadium.",
             ticketAvailabilityDate: "2025-04-20T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-04-25T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Auditorio Fundadores",
@@ -225,7 +227,8 @@ export const initialData: SeedData = {
             description: "A technology conference for developers.",
             ticketAvailabilityDate: "2025-05-15T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-05-20T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Plaza Mayor",
@@ -237,7 +240,8 @@ export const initialData: SeedData = {
             description: "Open-air concert featuring local bands.",
             ticketAvailabilityDate: "2025-06-01T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-06-05T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Teatro Metropolitano",
@@ -249,7 +253,8 @@ export const initialData: SeedData = {
             description: "Classical music concert with a full orchestra.",
             ticketAvailabilityDate: "2025-07-01T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-07-10T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Centro de Convenciones Plaza Mayor",
@@ -261,7 +266,8 @@ export const initialData: SeedData = {
             description: "Business seminar on innovation and entrepreneurship.",
             ticketAvailabilityDate: "2025-06-01T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-06-05T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Parque Norte",
@@ -273,7 +279,8 @@ export const initialData: SeedData = {
             description: "An outdoor family event with food trucks and entertainment.",
             ticketAvailabilityDate: "2025-08-01T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-08-10T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Teatro Universidad de Medellín",
@@ -285,7 +292,8 @@ export const initialData: SeedData = {
             description: "A theater performance of a famous play.",
             ticketAvailabilityDate: "2025-09-10T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-09-15T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Estadio Olímpico",
@@ -297,7 +305,8 @@ export const initialData: SeedData = {
             description: "A major sports event, finals for a national league.",
             ticketAvailabilityDate: "2025-10-01T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-10-05T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "La Macarena",
@@ -309,7 +318,8 @@ export const initialData: SeedData = {
             description: "A comedy night featuring international comedians.",
             ticketAvailabilityDate: "2025-11-15T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-11-20T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Parque de los Deseos",
@@ -321,7 +331,8 @@ export const initialData: SeedData = {
             description: "A film screening under the stars with food and drinks.",
             ticketAvailabilityDate: "2025-05-10T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-05-15T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Museo de Arte Moderno",
@@ -333,7 +344,8 @@ export const initialData: SeedData = {
             description: "An evening art exhibition and cultural talk.",
             ticketAvailabilityDate: "2025-06-20T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-06-25T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Jardín Botánico",
@@ -345,7 +357,8 @@ export const initialData: SeedData = {
             description: "A wellness fair with workshops and nature walks.",
             ticketAvailabilityDate: "2025-07-15T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-07-20T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Pueblito Paisa",
@@ -357,7 +370,8 @@ export const initialData: SeedData = {
             description: "A traditional music and food celebration.",
             ticketAvailabilityDate: "2025-08-10T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-08-15T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Biblioteca España",
@@ -369,7 +383,8 @@ export const initialData: SeedData = {
             description: "Literary readings and a book launch event.",
             ticketAvailabilityDate: "2025-09-25T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-10-01T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         },
         {
             place: "Casa de la Música",
@@ -381,7 +396,8 @@ export const initialData: SeedData = {
             description: "Live jazz night with guest artists.",
             ticketAvailabilityDate: "2025-10-10T00:00:00Z",
             ticketSaleAvailabilityDate: "2025-10-15T00:00:00Z",
-            city: "Medellín"
+            city: "Medellín",
+            price: 50000
         }
     ]
 }

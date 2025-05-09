@@ -8,6 +8,8 @@ import { EventModule } from './event/event.module';
 import { PresentationModule } from './presentation/presentation.module';
 import { TicketModule } from './ticket/ticket.module';
 import { HealthController } from './health/health.controller';
+import { SuccessController } from './success/success.controller';
+import { FailedController } from './failed/failed.controller';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -28,7 +30,7 @@ import { HealthController } from './health/health.controller';
     PresentationModule,
     TicketModule
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, SuccessController, FailedController],
   providers: [],
 })
 export class AppModule {}
