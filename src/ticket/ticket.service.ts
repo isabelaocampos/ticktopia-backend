@@ -65,7 +65,7 @@ export class TicketService {
     };
 
     try {
-      const response = await axios.post(
+      const response: {data: {url: string}} = await axios.post(
         'https://api.stripe.com/v1/checkout/sessions',
         qs.stringify(data),
         { headers },
