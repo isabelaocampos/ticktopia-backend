@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, InternalServerErrorException, Req } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { PresentationService } from '../presentation/presentation.service';
 import { AuthService } from '../auth/auth.service';
+import { CancelTicketDto } from './dto/cancel-ticket.dto';
 
 @Controller('tickets')
 export class TicketController {
@@ -27,7 +28,7 @@ export class TicketController {
       throw new InternalServerErrorException("User not found")
 
     }
-    const stripeData = await this.ticketService.createCheckoutSession(createTicketDto.quantity, user, presentation,)
+    const stripeData = await this.ticketService.createCheckoutSession(createTicketDto.quantity, user, presentation,) as { url: string };
     return stripeData.url;
   }
 
@@ -50,8 +51,7 @@ export class TicketController {
   cancelTicket(
   @Param('id') id: string,
   @Body() dto: CancelTicketDto,
-  @Req() req
-  ) {
+  @Req() req) {
   return this.ticketService.cancelTicket(id, req.user.id, dto);
   }
 

@@ -13,6 +13,8 @@ import { User } from '../auth/entities/user.entity';
 import { Presentation } from '../presentation/entities/presentation.entity';
 import axios from 'axios';
 import * as qs from 'qs';
+import { BuyTicketDto } from './dto/buy-ticket.dto';
+import { CancelTicketDto } from './dto/cancel-ticket.dto';
 
 @Injectable()
 export class TicketService {
