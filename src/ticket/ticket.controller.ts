@@ -1,22 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, InternalServerErrorException } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
-import { BuyTicketDto } from './dto/buy-ticket.dto';
-import { CancelTicketDto } from './dto/cancel-ticket.dto';
+import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { PresentationService } from '../presentation/presentation.service';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('tickets')
 export class TicketController {
-  constructor(private readonly ticketService: TicketService) {}
+  constructor(private readonly ticketService: TicketService, private readonly presentationService: PresentationService, private readonly userService: AuthService) { }
 
   @Post('admin')
   create(@Body() createTicketDto: CreateTicketDto) {
     return this.ticketService.create(createTicketDto);
   }
 
-  @Post('buy')
-  buyTicket(@Req() req, @Body() dto: BuyTicketDto) {
-    return this.ticketService.buyTicket(req.user.id, dto);
+  @Post("checkout")
+  async createCheckoutSession(@Body() createTicketDto: CreateCheckoutSessionDto) {
+    const presentation = await this.presentationService.findOne(createTicketDto.presentationId);
+    if (!presentation) {
+      throw new InternalServerErrorException("Presentation not found")
+    }
+
+    const user = await this.userService.findById(createTicketDto.userId);
+    if (!user) {
+      throw new InternalServerErrorException("User not found")
+
+    }
+    const stripeData = await this.ticketService.createCheckoutSession(createTicketDto.quantity, user, presentation,)
+    return stripeData.url;
   }
 
   @Get()

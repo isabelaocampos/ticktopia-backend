@@ -24,7 +24,7 @@ jest.mock('@nestjs/common', () => ({
   
   describe('Auth Decorator', () => {
     it('should call applyDecorators with RoleProtected and UseGuards', () => {
-      const roles: ValidRoles[] = [ValidRoles.admin, ValidRoles.teacher];
+      const roles: ValidRoles[] = [ValidRoles.admin, ValidRoles.client];
   
       Auth(...roles);
   

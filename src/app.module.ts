@@ -11,6 +11,9 @@ import { EventService } from './event/event.service';
 import { EventModule } from './event/event.module';
 import { PresentationModule } from './presentation/presentation.module';
 import { TicketModule } from './ticket/ticket.module';
+import { HealthController } from './health/health.controller';
+import { SuccessController } from './success/success.controller';
+import { FailedController } from './failed/failed.controller';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -31,8 +34,7 @@ import { TicketModule } from './ticket/ticket.module';
     PresentationModule,
     TicketModule
   ],
-  controllers: [TicketController, EventController],
-  providers: [TicketService, EventService],
-
+  controllers: [HealthController, SuccessController, FailedController],
+  providers: [],
 })
 export class AppModule {}
