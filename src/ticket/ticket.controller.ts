@@ -1,58 +1,83 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, InternalServerErrorException, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
-import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
-import { PresentationService } from '../presentation/presentation.service';
-import { AuthService } from '../auth/auth.service';
+import { BuyTicketDto } from './dto/buy-ticket.dto';
 import { CancelTicketDto } from './dto/cancel-ticket.dto';
+import { AuthService } from '../auth/auth.service';
+import { PresentationService } from '../presentation/presentation.service';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('Tickets')
 @Controller('tickets')
 export class TicketController {
-  constructor(private readonly ticketService: TicketService, private readonly presentationService: PresentationService, private readonly userService: AuthService) { }
+  constructor(
+    private readonly ticketService: TicketService,
+    private readonly authService: AuthService,
+    private readonly presentationService: PresentationService,
+  ) {}
 
   @Post('admin')
-  create(@Body() createTicketDto: CreateTicketDto) {
+  @ApiOperation({ summary: 'Create a ticket manually (admin)' })
+  async create(@Body() createTicketDto: CreateTicketDto) {
     return this.ticketService.create(createTicketDto);
   }
 
-  @Post("checkout")
-  async createCheckoutSession(@Body() createTicketDto: CreateCheckoutSessionDto) {
-    const presentation = await this.presentationService.findOne(createTicketDto.presentationId);
-    if (!presentation) {
-      throw new InternalServerErrorException("Presentation not found")
+  @Post('buy')
+  @ApiOperation({ summary: 'Buy a ticket (simulated)' })
+  async buyTicket(@Body() buyDto: BuyTicketDto) {
+    const user = await this.authService.findById(buyDto.userId);
+    const presentation = await this.presentationService.findOne(
+      buyDto.presentationId,
+    );
+
+    if (!user || !presentation) {
+      throw new InternalServerErrorException('User or Presentation not found');
     }
 
-    const user = await this.userService.findById(createTicketDto.userId);
-    if (!user) {
-      throw new InternalServerErrorException("User not found")
-
-    }
-    const stripeData = await this.ticketService.createCheckoutSession(createTicketDto.quantity, user, presentation,) as { url: string };
-    return stripeData.url;
+    return this.ticketService.buyTicket(user.id, buyDto);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all tickets (admin or dev)' })
   findAll() {
     return this.ticketService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a ticket by ID' })
   findOne(@Param('id') id: string) {
     return this.ticketService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
-    return this.ticketService.update(id, updateTicketDto);
+  @ApiOperation({ summary: 'Update a ticket' })
+  update(@Param('id') id: string, @Body() updateDto: UpdateTicketDto) {
+    return this.ticketService.update(id, updateDto);
   }
 
   @Patch(':id/cancel')
-  cancelTicket(
-  @Param('id') id: string,
-  @Body() dto: CancelTicketDto,
-  @Req() req) {
-  return this.ticketService.cancelTicket(id, req.user.id, dto);
+  @ApiOperation({ summary: 'Cancel a ticket' })
+  async cancelTicket(
+    @Param('id') id: string,
+    @Body() dto: CancelTicketDto,
+  ) {
+    const user = await this.authService.findById(dto.userId); // asumes userId viene en el dto
+    return this.ticketService.cancelTicket(id, user.id, dto);
   }
 
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a ticket (dev)' })
+  remove(@Param('id') id: string) {
+    return this.ticketService.remove(id);
+  }
 }
