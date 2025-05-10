@@ -7,7 +7,7 @@ import { AuthService } from "./auth.service";
 import { User } from "./entities/user.entity";
 import { CreateAuthDto } from "./dto/create-auth.dto";
 import * as bcrypt from 'bcrypt';
-import { LoginUserDto } from './dto/Login-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
 
 describe('AuthService', () => {
     let authService: AuthService;

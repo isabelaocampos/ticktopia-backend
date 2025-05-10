@@ -50,4 +50,14 @@ export class Event {
 
   @OneToMany(() => Presentation, presentation => presentation.event)
   presentations: Presentation[];
+
+  checkFieldsBeforeInsert() {
+  if (this.name) this.name = this.name.trim();
+  if (this.bannerPhotoUrl) this.bannerPhotoUrl = this.bannerPhotoUrl.trim().toLowerCase();
+}
+
+checkFieldsBeforeUpdate() {
+  this.checkFieldsBeforeInsert();
+}
+
 }
