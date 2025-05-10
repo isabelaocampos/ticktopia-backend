@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ticket } from './entities/ticket.entity';
@@ -104,5 +104,37 @@ export class TicketService {
     const ticket = await this.ticketRepo.findOne({ where: { id } });
     if (!ticket) throw new NotFoundException('Ticket not found');
     return this.ticketRepo.remove(ticket);
+  }
+  async buyTicket(userId: string, buyDto: BuyTicketDto) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    const presentation = await this.presentationRepo.findOne({
+      where: { idPresentation: buyDto.presentationId },
+    });
+  
+    if (!user || !presentation) {
+      throw new NotFoundException('User or Presentation not found');
+    }
+  
+    const sold = await this.ticketRepo.count({
+      where: {
+        presentation: { idPresentation: presentation.idPresentation },
+        isActive: true,
+      },
+    });
+  
+    if (sold + buyDto.quantity > presentation.capacity) {
+      throw new BadRequestException('Not enough tickets available');
+    }
+  
+    const ticket = this.ticketRepo.create({
+      user,
+      presentation,
+      buyDate: new Date(),
+      isActive: true,
+      isRedeemed: false,
+      quantity: buyDto.quantity,
+    });
+  
+    return this.ticketRepo.save(ticket);
   }
 }

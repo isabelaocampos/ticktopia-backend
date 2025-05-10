@@ -65,17 +65,9 @@ export class TicketController {
     return this.ticketService.update(id, updateDto);
   }
 
-  @Patch(':id/cancel')
-  @ApiOperation({ summary: 'Cancel a ticket' })
-  async cancelTicket(
-    @Param('id') id: string,
-    @Body() dto: CancelTicketDto,
-  ) {
-    const user = await this.authService.findById(dto.userId); // asumes userId viene en el dto
-    return this.ticketService.cancelTicket(id, user.id, dto);
-  }
 
-  @Delete(':id')
+
+  @Delete(':id/delete')
   @ApiOperation({ summary: 'Delete a ticket (dev)' })
   remove(@Param('id') id: string) {
     return this.ticketService.remove(id);

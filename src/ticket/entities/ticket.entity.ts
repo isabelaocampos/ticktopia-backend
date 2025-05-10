@@ -23,6 +23,10 @@ export class Ticket {
     @Column({ type: 'boolean' })
     isActive: boolean;
 
+    @Column({ type: 'int', default: 1 })
+    quantity: number;
+
+
     @ManyToOne(
         () => User,
         (user) => user.tickets,
