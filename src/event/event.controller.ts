@@ -1,79 +1,84 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  Query,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { NotFoundException, Logger } from '@nestjs/common';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { User } from '../auth/entities/user.entity';
+import { ValidRoles } from '../auth/enums/valid-roles.enum';
 
+
+@ApiTags('Event')
 @Controller('event')
 export class EventController {
-  private readonly logger = new Logger('EventController');
+  constructor(private readonly EventService: EventService) {}
 
-  constructor(private readonly eventService: EventService) {}
-
-  @Post()
-  async create(@Body() createEventDto: CreateEventDto) {
-    try {
-      if (createEventDto.isPublic === undefined) {
-        createEventDto.isPublic = true;
-      }
-      const newEvent = await this.eventService.create(createEventDto);
-      return newEvent;
-    } catch (error) {
-      this.logger.error('Error creating event', error.stack);
-      throw error;
-    }
+  @Post('createEvent')
+  @ApiResponse({ status: 201, description: 'Event was created' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @Auth(ValidRoles.admin, ValidRoles.eventManager)
+  create(@Body() createEventDto: CreateEventDto, @GetUser() user: User) {
+    // Asegura que el userId sea el del usuario autenticado
+    return this.EventService.create({ ...createEventDto, userId: user.id });
   }
 
-  @Get()
-  async findAll() {
-    try {
-      const events = await this.eventService.findAll();
-      return events;
-    } catch (error) {
-      this.logger.error('Error fetching events', error.stack);
-      throw error;
-    }
+  @Get('findAllEvents')
+  @Auth(ValidRoles.admin)
+  @ApiResponse({ status: 200, description: 'All events returned' })
+  findAll(@Query('limit') limit: string, @Query('offset') offset: string) {
+    const parsedLimit = parseInt(limit, 10) || 10;
+    const parsedOffset = parseInt(offset, 10) || 0;
+    return this.EventService.findAll(parsedLimit, parsedOffset);
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    try {
-      const event = await this.eventService.findOne(id);
-      if (!event) {
-        throw new NotFoundException(`Event with ID ${id} not found`);
-      }
-      return event;
-    } catch (error) {
-      this.logger.error(`Error fetching event with ID ${id}`, error.stack);
-      throw error;
-    }
+  @Get('findEvents/user/:userId')
+  @Auth(ValidRoles.admin, ValidRoles.eventManager)
+  findAllByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.EventService.findAllByUserId(userId);
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    try {
-      const updatedEvent = await this.eventService.update(id, updateEventDto);
-      if (!updatedEvent) {
-        throw new NotFoundException(`Event with ID ${id} not found`);
-      }
-      return updatedEvent;
-    } catch (error) {
-      this.logger.error(`Error updating event with ID ${id}`, error.stack);
-      throw error;
-    }
+  @Get('findEvent/:term')
+  @Auth(ValidRoles.admin, ValidRoles.eventManager)
+  findOne(@Param('term') term: string, @GetUser() user: User) {
+    return this.EventService.findOne(term, user);
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    try {
-      const deletedEvent = await this.eventService.remove(id);
-      if (!deletedEvent) {
-        throw new NotFoundException(`Event with ID ${id} not found`);
-      }
-      return { message: `Event with ID ${id} has been deleted successfully` };
-    } catch (error) {
-      this.logger.error(`Error deleting event with ID ${id}`, error.stack);
-      throw error;
-    }
+  @Patch('updateEvent/:id')
+  @Auth(ValidRoles.admin, ValidRoles.eventManager)
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateEventDto: UpdateEventDto,
+    @GetUser() user: User,
+  ) {
+    return this.EventService.update(id, updateEventDto, user);
+  }
+
+  @Delete('deleteEvent/:id')
+  @ApiResponse({ status: 200, description: 'Event was removed' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 403, description: 'Forbidden. Token related.' })
+  @Auth(ValidRoles.admin, ValidRoles.eventManager)
+  remove(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
+    return this.EventService.remove(id, user);
+  }
+
+  @Delete('deleteAllEvents')
+  @ApiResponse({ status: 200, description: 'All events removed' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @Auth(ValidRoles.admin)
+  deleteAll() {
+    return this.EventService.deleteAll();
   }
 }
