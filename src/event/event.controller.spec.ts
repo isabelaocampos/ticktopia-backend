@@ -6,9 +6,50 @@ import { User } from '../auth/entities/user.entity';
 import { ValidRoles } from '../auth/enums/valid-roles.enum';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { BadRequestException } from '@nestjs/common';
+import { AuthGuard, PassportModule } from '@nestjs/passport';
+import { UserRoleGuard } from '../auth/guards/user-role/user-role.guard';
+
+jest.mock('@nestjs/passport', () => {
+  return {
+    ...jest.requireActual('@nestjs/passport'),
+    AuthGuard: jest.fn().mockImplementation(() => ({
+      canActivate: jest.fn().mockReturnValue(true),
+    })),
+  };
+});
+
+jest.mock('../auth/guards/user-role/user-role.guard', () => {
+  return {
+    UserRoleGuard: jest.fn().mockImplementation(() => ({
+      canActivate: jest.fn().mockReturnValue(true),
+    })),
+  };
+});
 
 describe('EventController', () => {
   let controller: EventController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        PassportModule.register({ defaultStrategy: 'jwt' }), // Importar PassportModule
+      ],
+      controllers: [EventController],
+      providers: [
+        {
+          provide: EventService,
+          useValue: mockEventService,
+        },
+      ],
+    })
+    .overrideGuard(AuthGuard('jwt')) // Sobreescribir el AuthGuard
+    .useValue({ canActivate: jest.fn().mockReturnValue(true) })
+    .overrideGuard(UserRoleGuard) // Sobreescribir el UserRoleGuard
+    .useValue({ canActivate: jest.fn().mockReturnValue(true) })
+    .compile();
+
+    controller = module.get<EventController>(EventController);
+  });
 
   const mockEventService = {
     // Mock del método create con un ejemplo de respuesta

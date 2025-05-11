@@ -5,7 +5,7 @@ import { Event } from './entities/event.entity';
 import { User } from '../auth/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
-import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
+import { ValidRoles } from '../auth/enums/valid-roles.enum';
 import { NotFoundException, ForbiddenException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 
 describe('EventService', () => {
