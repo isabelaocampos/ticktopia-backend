@@ -1,29 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TicketService } from './ticket.service';
+import { TicketService } from '../../src/ticket/ticket.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from 'src/auth/entities/user.entity';
-import { Presentation } from 'src/presentation/entities/presentation.entity';
+import { Ticket } from '../../src/ticket/entities/ticket.entity';
+import { User } from '../../src/auth/entities/user.entity';
+import { Presentation } from '../../src/presentation/entities/presentation.entity';
 import { Repository } from 'typeorm';
-
-import { Ticket } from 'src/ticket/entities/ticket.entity';
-import { BuyTicketDto } from 'src/ticket/dto/buy-ticket.dto';
-
-const mockTicketRepository = {
-  find: jest.fn(),
-  save: jest.fn(),
-};
-
-const mockUserRepository = {
-  find: jest.fn(),
-  save: jest.fn(),
-};
-
-
-const mockPresentationRepository = {
-  find: jest.fn(),
-  save: jest.fn(),
-};
-
+import { BuyTicketDto } from '../../src/ticket/dto/buy-ticket.dto';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('TicketService', () => {
   let service: TicketService;
@@ -38,19 +21,22 @@ describe('TicketService', () => {
         {
           provide: getRepositoryToken(Ticket),
           useValue: {
+            count: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
-            findOne: jest.fn(),
-            count: jest.fn(),
           },
         },
         {
           provide: getRepositoryToken(User),
-          useValue: { findOne: jest.fn() },
+          useValue: {
+            findOne: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(Presentation),
-          useValue: { findOne: jest.fn() },
+          useValue: {
+            findOne: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -61,43 +47,48 @@ describe('TicketService', () => {
     presentationRepo = module.get(getRepositoryToken(Presentation));
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  it('should throw if user or presentation not found', async () => {
-    jest.spyOn(userRepo, 'findOne').mockResolvedValue(null);
+  it('should buy a ticket successfully', async () => {
+    const user = { id: 'user-1' } as User;
+    const presentation = { idPresentation: 'pres-1', capacity: 100 } as Presentation;
     const dto: BuyTicketDto = {
-        presentationId: 'abc',
-        quantity: 1,
-        userId: ''
+      presentationId: 'pres-1', quantity: 2,
+      userId: ''
     };
 
-    await expect(service.buyTicket('userId', dto)).rejects.toThrow();
+    jest.spyOn(userRepo, 'findOne').mockResolvedValue(user);
+    jest.spyOn(presentationRepo, 'findOne').mockResolvedValue(presentation);
+    jest.spyOn(ticketRepo, 'count').mockResolvedValue(10);
+    jest.spyOn(ticketRepo, 'create').mockReturnValue({} as Ticket);
+    jest.spyOn(ticketRepo, 'save').mockResolvedValue({ id: 'ticket-1' } as Ticket);
+
+    const result = await service.buyTicket(user.id, dto);
+    expect(result).toEqual({ id: 'ticket-1' });
   });
 
-  it('should create a ticket if data is valid and space is available', async () => {
-    const user = { id: 'userId' } as User;
-    const presentation = {
-      idPresentation: 'abc',
-      capacity: 100,
-      tickets: [],
-    } as unknown as Presentation;
+  it('should throw if presentation not found', async () => {
+    const dto: BuyTicketDto = {
+      presentationId: 'x', quantity: 1,
+      userId: ''
+    };
+
+    jest.spyOn(userRepo, 'findOne').mockResolvedValue({} as User);
+    jest.spyOn(presentationRepo, 'findOne').mockResolvedValue(null);
+
+    await expect(service.buyTicket('user', dto)).rejects.toThrow(NotFoundException);
+  });
+
+  it('should throw if not enough tickets', async () => {
+    const user = { id: 'user-1' } as User;
+    const presentation = { idPresentation: 'pres-1', capacity: 5 } as Presentation;
+    const dto: BuyTicketDto = {
+      presentationId: 'pres-1', quantity: 10,
+      userId: ''
+    };
 
     jest.spyOn(userRepo, 'findOne').mockResolvedValue(user);
     jest.spyOn(presentationRepo, 'findOne').mockResolvedValue(presentation);
     jest.spyOn(ticketRepo, 'count').mockResolvedValue(0);
-    jest.spyOn(ticketRepo, 'findOne').mockResolvedValue(null);
-    jest.spyOn(ticketRepo, 'create').mockReturnValue({} as Ticket);
-    jest.spyOn(ticketRepo, 'save').mockResolvedValue({ id: '123' } as Ticket);
 
-    const dto: BuyTicketDto = {
-        presentationId: 'abc',
-        quantity: 1,
-        userId: ''
-    };
-
-    const result = await service.buyTicket('userId', dto);
-    expect(result).toEqual({ id: '123' });
+    await expect(service.buyTicket(user.id, dto)).rejects.toThrow(BadRequestException);
   });
 });

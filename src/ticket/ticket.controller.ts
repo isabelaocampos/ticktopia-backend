@@ -12,7 +12,7 @@ import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { BuyTicketDto } from './dto/buy-ticket.dto';
-import { CancelTicketDto } from './dto/cancel-ticket.dto';
+
 import { AuthService } from '../auth/auth.service';
 import { PresentationService } from '../presentation/presentation.service';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
@@ -64,7 +64,6 @@ export class TicketController {
   update(@Param('id') id: string, @Body() updateDto: UpdateTicketDto) {
     return this.ticketService.update(id, updateDto);
   }
-
 
 
   @Delete(':id/delete')

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ticket } from './entities/ticket.entity';
@@ -9,7 +9,6 @@ import { Presentation } from '../presentation/entities/presentation.entity';
 import axios from 'axios';
 import * as qs from 'qs';
 import { BuyTicketDto } from './dto/buy-ticket.dto';
-import { CancelTicketDto } from './dto/cancel-ticket.dto';
 
 @Injectable()
 export class TicketService {
@@ -137,4 +136,5 @@ export class TicketService {
   
     return this.ticketRepo.save(ticket);
   }
+
 }
