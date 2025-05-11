@@ -4,11 +4,12 @@ import { PresentationController } from './presentation.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Presentation } from './entities/presentation.entity';
 import { Event } from '../event/entities/event.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [PresentationController],
   providers: [PresentationService],
-  imports: [TypeOrmModule.forFeature([Presentation, Event]),
+  imports: [ AuthModule,TypeOrmModule.forFeature([Presentation, Event],),
   ],
   exports: [PresentationService]
 })

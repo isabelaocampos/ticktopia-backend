@@ -1,12 +1,9 @@
-import { Controller, Get, Post, Body, Req, Headers } from '@nestjs/common';
+import { Controller, Post, Body, Req} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { GetUser } from './decorators/get-user.decorator';
-import { User } from './entities/user.entity';
 import { ValidRoles } from './enums/valid-roles.enum';
 import { Auth } from './decorators/auth.decorator';
-import { RawHeaders } from './decorators/raw-headers.decorator';
-import { IncomingHttpHeaders } from 'http';
+
 import { ApiTags } from '@nestjs/swagger';
 import { LoginUserDto } from './dto/Login-user.dto';
 

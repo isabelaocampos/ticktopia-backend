@@ -1,6 +1,9 @@
 import { ExecutionContext, BadRequestException, ForbiddenException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { UserRoleGuard } from "./user-role.guard";
+jest.mock('@nestjs/passport', () => ({
+  AuthGuard: () => jest.fn(() => true),
+}));
 
 describe('UserRole Guard', () => {
     let guard: UserRoleGuard;

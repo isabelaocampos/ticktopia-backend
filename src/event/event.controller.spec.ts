@@ -7,6 +7,11 @@ import { ValidRoles } from '../auth/enums/valid-roles.enum';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { BadRequestException } from '@nestjs/common';
 
+jest.mock('@nestjs/passport', () => ({
+  AuthGuard: () => jest.fn(() => true),
+}));
+
+
 describe('EventController', () => {
   let controller: EventController;
 
