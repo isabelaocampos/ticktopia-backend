@@ -6,7 +6,7 @@ import {
   OneToMany,
   JoinColumn
 } from "typeorm";
-import { Ticket } from "src/ticket/entities/ticket.entity";
+import { Ticket } from "../../ticket/entities/ticket.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../../auth/entities/user.entity";
 import { Presentation } from "../../presentation/entities/presentation.entity";

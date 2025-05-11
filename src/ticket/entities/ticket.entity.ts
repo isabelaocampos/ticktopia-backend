@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../../auth/entities/user.entity";
 import { Presentation } from "../../presentation/entities/presentation.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Event } from "src/event/entities/event.entity";
+import { Event } from "../../event/entities/event.entity";
 
 @Entity()
 export class Ticket {
