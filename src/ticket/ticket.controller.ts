@@ -27,7 +27,7 @@ export class TicketController {
       throw new InternalServerErrorException("User not found")
 
     }
-    const stripeData = await this.ticketService.createCheckoutSession(createTicketDto.quantity, user, presentation,)
+    const stripeData = await this.ticketService.createCheckoutSession(createTicketDto.quantity, user, presentation);
     return stripeData.url;
   }
 

@@ -1,36 +1,63 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn
+} from "typeorm";
+import { Ticket } from "../../ticket/entities/ticket.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../../auth/entities/user.entity";
 import { Presentation } from "../../presentation/entities/presentation.entity";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity()
+@Entity('event')
 export class Event {
-    @ApiProperty({
-        example: 'cd533345-f1f3-48c9-a62e-7dc2da50c8f8',
-        description: 'Event ID',
-        uniqueItems: true
-    })
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @ApiProperty({
+    example: 'cd533345-f1f3-48c9-a62e-7dc2da50c8f8',
+    description: 'Event ID',
+    uniqueItems: true
+  })
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
+  @ApiProperty()
+  @Column('text')
+  name: string;
 
-    @Column('text')
-    name: string;
+  @ApiProperty({nullable: true})
+  @Column({ type: 'varchar', length: 255 }) // más realista para URLs largas
+  bannerPhotoUrl: string;
 
-    @Column('text')
-    bannerPhotoUrl: string;
+  @ApiProperty()
+  @Column({ type: 'boolean' })
+  isPublic: boolean;
 
-    @Column({ type: 'boolean' })
-    isPublic: boolean;
+  @ApiProperty()
+  @Column({ type: 'int' })
+  totalTickets: number;
 
-    @OneToMany(() => Presentation, (presentation) => presentation.event)
-    presentations: Presentation[];
+  @ApiProperty()
+  @Column({ type: 'int' })
+  availableTickets: number;
 
-    @ManyToOne(
-        () => User,
-        (user) => user.events,
-        { cascade: true, eager: true, nullable: false }
-    )
-    user: User;
+  @ManyToOne(() => User, user => user.events, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'User_idUser' })
+  user: User;
+
+  @OneToMany(() => Ticket, ticket => ticket.event, { cascade: true })
+  tickets: Ticket[];
+
+  @OneToMany(() => Presentation, presentation => presentation.event)
+  presentations: Presentation[];
+
+  checkFieldsBeforeInsert() {
+  if (this.name) this.name = this.name.trim();
+  if (this.bannerPhotoUrl) this.bannerPhotoUrl = this.bannerPhotoUrl.trim().toLowerCase();
+}
+
+checkFieldsBeforeUpdate() {
+  this.checkFieldsBeforeInsert();
+}
 
 }
