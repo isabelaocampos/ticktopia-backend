@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './interfaces/jwt.interface';
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/Login-user.dto';
+import { plainToInstance } from 'class-transformer';
+import { UserDto } from './dto/find-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +20,7 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) { }
 
-  async create(createUserDto: CreateAuthDto & {roles?: string[]}) {
+  async create(createUserDto: CreateAuthDto & { roles?: string[] }) {
     const { password, ...userData } = createUserDto;
     try {
       const user = this.userRepository.create({
@@ -93,21 +95,27 @@ export class AuthService {
   }
 
   async findById(id: string) {
-  const user = await this.userRepository.findOne({
-    where: { id },
-    select: {
-      id: true,
-      email: true,
-      roles: true,
-    }
-  });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        roles: true,
+      }
+    });
 
-  if (!user) {
-    throw new NotFoundException(`User with ID ${id} not found`);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return user;
   }
 
-  return user;
-}
+  async findAll() {
+    const users = await this.userRepository.find();
+    return plainToInstance(UserDto, users);
+
+  }
 
   private getJwtToken(payload: JwtPayload) {
     const token = this.jwtService.sign(payload);
