@@ -236,9 +236,103 @@ describe('EventController - deleteAll', () => {
     controller = module.get<EventController>(EventController);
   });
 
+
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('should delete all events when called by an admin', async () => {
+    const responseMock = { message: 'All events deleted' };
+    mockEventService.deleteAll.mockResolvedValue(responseMock);
+
+    const result = await controller.deleteAll();
+    expect(result).toEqual(responseMock);
+    expect(mockEventService.deleteAll).toHaveBeenCalled();
+  });
+
+  it('should throw BadRequestException if service fails', async () => {
+    mockEventService.deleteAll.mockImplementation(() => {
+      throw new BadRequestException('Something went wrong');
+    });
+
+    expect(() => controller.deleteAll()).toThrow(BadRequestException);
+  });
+});
+
+describe('EventController - findAll', () => {
+  let controller: EventController;
+
+  const mockEventService = {
+    findAll: jest.fn(),
+  };
+
+  const mockAdminUser: User = {
+    id: 'admin-id',
+    roles: [ValidRoles.admin],
+    email: 'admin@example.com',
+    name: 'Admin User',
+    lastname: 'Admin Lastname',
+    isActive: true,
+    password: 'securepass',
+    events: [],
+    tickets: [],
+    checkFieldsBeforeInsert: jest.fn(),
+    checkFieldsBeforeUpdate: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [EventController],
+      providers: [
+        {
+          provide: EventService,
+          useValue: mockEventService,
+        },
+      ],
+    }).compile();
+
+    controller = module.get<EventController>(EventController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
+  it('should return a list of events with default pagination', async () => {
+    const mockEvents = ['event1', 'event2'];
+    mockEventService.findAll.mockResolvedValue(mockEvents);
+
+    const result = await controller.findAll('10', '0');
+    expect(result).toEqual(mockEvents);
+    expect(mockEventService.findAll).toHaveBeenCalledWith(10, 0); // valores por defecto
+  });
+
+  it('should return a list of events with provided limit and offset', async () => {
+    const mockEvents = ['event1', 'event2', 'event3'];
+    mockEventService.findAll.mockResolvedValue(mockEvents);
+
+    const result = await controller.findAll('5', '15');
+    expect(result).toEqual(mockEvents);
+    expect(mockEventService.findAll).toHaveBeenCalledWith(5, 15);
+  });
+
+  it('should handle invalid limit and offset values', async () => {
+    const mockEvents = ['event1'];
+    mockEventService.findAll.mockResolvedValue(mockEvents);
+
+    const result = await controller.findAll('invalid', 'wrong');
+    expect(result).toEqual(mockEvents);
+    expect(mockEventService.findAll).toHaveBeenCalledWith(10, 0); // defaults si parseInt falla
+  });
+
+  it('should throw BadRequestException if service fails', async () => {
+    mockEventService.findAll.mockImplementation(() => {
+      throw new BadRequestException('Something went wrong');
+    });
+
+    expect(() => controller.findAll('10', '0')).toThrow(BadRequestException);
+  });
+});
 
   it('should delete all events when called by an admin', async () => {
     const responseMock = { message: 'All events deleted' };

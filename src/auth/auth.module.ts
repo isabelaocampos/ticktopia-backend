@@ -11,22 +11,20 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 @Module({
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, ConfigService],
-  imports:[
+  imports: [
     TypeOrmModule.forFeature([User]),
-    PassportModule.register({defaultStrategy: 'jwt'}),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
-      imports:[ConfigModule],
+      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService)=>{
-        return{
-          secret: configService.get('JWT_SECRET') ?? "super-secreto",
-          signOptions: {
-            expiresIn: '1h'
-          }
-        }
-      }
-    })
+      useFactory: (configService: ConfigService) => {
+        return {
+          secret: configService.get('JWT_SECRET') ?? 'super-secreto',
+          signOptions: { expiresIn: '1h' },
+        };
+      },
+    }),
   ],
-  exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule, AuthService]
+  exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule, AuthService],
 })
 export class AuthModule {}

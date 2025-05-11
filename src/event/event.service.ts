@@ -58,8 +58,118 @@ async update(id: string, updateEventDto: UpdateEventDto, user: User) {
     });
 
     if (!event) {
+async update(id: string, updateEventDto: UpdateEventDto, user: User) {
+  try {
+    const event = await this.eventRepository.findOne({
+      where: { id },
+      relations: { user: true }
+    });
+
+    if (!event) {
       throw new NotFoundException(`Event with ID ${id} not found`);
     }
+
+    const isAdmin = user.roles.includes(ValidRoles.admin);
+    const isEventManager = user.roles.includes(ValidRoles.eventManager);
+
+    if (isEventManager && event.user.id !== user.id) {
+      throw new ForbiddenException('You can only update your own events');
+    }
+
+    await this.eventRepository.update(id, updateEventDto);
+    const updatedEvent = await this.findOne(id, user);
+    return updatedEvent;
+  } catch (error) {
+    if (
+      error instanceof NotFoundException ||
+      error instanceof ForbiddenException ||
+      error instanceof BadRequestException
+    ) {
+      throw error;
+    }
+    this.logger.error(`Error updating event with ID ${id}`, error.stack);
+    throw new InternalServerErrorException('Error updating event');
+  }
+}
+
+async remove(id: string, user: User) {
+  try {
+    const event = await this.eventRepository.findOne({
+      where: { id },
+      relations: { user: true }
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with ID ${id} not found`);
+    }
+
+    const isAdmin = user.roles.includes(ValidRoles.admin);
+    const isEventManager = user.roles.includes(ValidRoles.eventManager);
+
+    if (isEventManager && event.user.id !== user.id) {
+      throw new ForbiddenException('You can only delete your own events');
+    }
+
+    await this.eventRepository.remove(event);
+    return event;
+  } catch (error) {
+    if (
+      error instanceof NotFoundException ||
+      error instanceof ForbiddenException ||
+      error instanceof BadRequestException
+    ) {
+      throw error;  // Re-throw expected exceptions
+    }
+    this.logger.error(error.detail || error.message);
+    this.handleExceptions(error);
+    throw new InternalServerErrorException('Unexpected error occurred during event removal');  // Ensure error is thrown
+  }
+}
+
+
+async findOne(term: string, user: User): Promise<Event> {
+  const event = await this.eventRepository.findOne({
+    where: [{ id: term }, { name: term }],
+    relations: ['user'],
+  });
+
+  if (!event) {
+    throw new NotFoundException(`Event with id or name "${term}" not found`);
+  }
+
+  const isAdmin = user.roles.includes(ValidRoles.admin);
+  const isOwner = event.user.id === user.id;
+
+  if (!isAdmin && !isOwner) {
+    throw new ForbiddenException('Access to this event is restricted');
+  }
+
+  return event;
+}
+
+
+  async findAll(limit = 10, offset = 0) {
+        try{
+            return await this.eventRepository.find({
+                take: limit,
+                skip: offset
+            });
+        }catch(error){
+            this.handleExceptions(error);
+        }
+  }
+
+  async findAllByUserId(userId: string) {
+  try {
+    const events = await this.eventRepository.find({
+      where: { user: { id: userId } }
+    });
+
+    return events;
+  } catch (error) {
+    this.logger.error(`Error fetching events for user ${userId}`, error.stack);
+    throw new InternalServerErrorException('Error fetching events for user');
+  }
 
     const isAdmin = user.roles.includes(ValidRoles.admin);
     const isEventManager = user.roles.includes(ValidRoles.eventManager);
@@ -178,6 +288,12 @@ async findOne(term: string, user: User): Promise<Event> {
     }
   }
 
+  private handleExceptions(error: any): never {
+        if (error.code === "23505")
+          throw new BadRequestException(error.detail);
+      
+        this.logger.error(error.detail);
+        throw new InternalServerErrorException('Unexpected error, check your server');
   private handleExceptions(error: any): never {
         if (error.code === "23505")
           throw new BadRequestException(error.detail);

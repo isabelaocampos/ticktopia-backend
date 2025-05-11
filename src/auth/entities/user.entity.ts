@@ -46,4 +46,9 @@ export class User {
     checkFieldsBeforeUpdate() {
       this.checkFieldsBeforeInsert();
     }
+
+    
+
+    
+
 }
