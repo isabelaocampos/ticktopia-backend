@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { User } from '../auth/entities/user.entity';
 import { PassportModule } from '@nestjs/passport';
-import { AuthModule } from '../auth/auth.module';
 
 @Module({
   controllers: [EventController],
