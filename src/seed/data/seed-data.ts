@@ -12,10 +12,6 @@ interface SeedEvent {
     name: string;
     bannerPhotoUrl: string;
     isPublic: boolean;
-    totalTickets: number;
-    availableTickets: number;
-    userId: string; // Asume que el ID del usuario ya existe
-
 }
 interface SeedPresentation {
     place: string;
@@ -181,23 +177,32 @@ export const initialData: SeedData = {
 
     ],
 
-    events: [ {
-        name: 'Tech Conference 2025',
-        bannerPhotoUrl: 'https://example.com/banner1.jpg',
-        isPublic: true,
-        totalTickets: 100,
-        availableTickets: 100,
-        userId: 'cd533345-f1f3-48c9-a62e-7dc2da50c8f8',  // Asume que el ID del usuario ya existe
-      },
-      {
-        name: 'Coding Bootcamp',
-        bannerPhotoUrl: 'https://example.com/banner2.jpg',
-        isPublic: true,
-        totalTickets: 50,
-        availableTickets: 50,
-        userId: 'cd533345-f1f3-48c9-a62e-7dc2da50c8f8',  // Asume que el ID del usuario ya existe
-      },
-
+    events: [
+        {
+            name: "ANDRÉS CALAMARO: AGENDA 1999 TOUR",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746554872/ltavyxu115tlpcvhjews.jpg",
+            isPublic: true,
+        },
+        {
+            name: "Debí Tirar Más Fotos World Tour",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746655189/avljgk2jxugrtoyy1qmv.jpg",
+            isPublic: true,
+        },
+        {
+            name: "CAMILO | NUESTRO LUGAR FELIZ TOUR - CALI",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746655493/u5dhbldu2ob7wjherfxf.jpg",
+            isPublic: true,
+        },
+        {
+            name: "REY RUIZ | SIEMPRE CONTIGO",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746655833/wixrcw9ay0y4ilgzleqe.jpg",
+            isPublic: true,
+        },
+        {
+            name: "TRUENO",
+            bannerPhotoUrl: "https://res.cloudinary.com/dnmlo67cy/image/upload/v1746656053/gwxuquxh1omlmifzh9lk.jpg",
+            isPublic: true,
+        }
     ],
 
     presentations: [
@@ -399,4 +404,4 @@ export const initialData: SeedData = {
     ]
 }
 
-  
+

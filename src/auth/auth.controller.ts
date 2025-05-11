@@ -13,7 +13,7 @@ import { LoginUserDto } from './dto/Login-user.dto';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('register')
   create(@Body() createAuthDto: CreateAuthDto) {
@@ -23,27 +23,18 @@ export class AuthController {
   @Auth(ValidRoles.admin)
   @Post('register/event-manager')
   createEventManager(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create({...createAuthDto, roles: ['event-manager']});
+    return this.authService.create({ ...createAuthDto, roles: ['event-manager'] });
   }
 
   @Post('login')
-  login(@Body() loginUserDto: LoginUserDto){
+  login(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
   }
 
-
-  // @Get('private2')
-  // @Auth(ValidRoles.teacher)
-  // privateRoute2(
-  //   @GetUser() user: User,
-   
-  // ){
-  //   console.log("🚀 ~ :34 ~ AuthController ~ headers:", user)
-  //   return{
-  //     ok: true,
-  //     message: 'Success!'
-  //   }
-  // }
+  @Get('users')
+  findAllUsers() {
+    return this.authService.findAll();
+  }
 
 
 }

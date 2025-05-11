@@ -17,6 +17,7 @@ describe('EventService', () => {
     create: jest.fn(),
     save: jest.fn(),
     find: jest.fn(),
+    delete: jest.fn(),
     findOne: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
@@ -344,9 +345,6 @@ describe('EventService', () => {
       expect(handleExceptionsSpy).toHaveBeenCalledWith(expect.any(Error));
     });
 
-
-
-
   });
 
   describe('deleteAll', () => {
@@ -356,20 +354,13 @@ describe('EventService', () => {
       mockEventRepo.remove.mockResolvedValue(events);
 
       const result = await service.deleteAll();
-      expect(result.message).toMatch(/2 event\(s\) deleted successfully/);
-    });
-
-    it('should return message if no events to delete', async () => {
-      mockEventRepo.find.mockResolvedValue([]);
-      const result = await service.deleteAll();
-      expect(result.message).toBe('No events to delete');
+      expect(result.message).toMatch(/All events deleted successfully/);
     });
 
     it('should log the error and throw InternalServerErrorException if an error occurs during deletion', async () => {
       const error = new Error('Unexpected DB error');
-
       // Simula fallo al hacer find()
-      mockEventRepo.find.mockRejectedValue(error);
+      mockEventRepo.delete.mockRejectedValue(error);
 
       // Espía el logger
       const loggerSpy = jest.spyOn(service['logger'], 'error').mockImplementation();
