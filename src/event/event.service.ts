@@ -7,7 +7,7 @@ import { User } from '../auth/entities/user.entity';
 import { DataSource, DeepPartial, Repository } from 'typeorm';
 // Removed duplicate import of CreateEventDto
 import { isUUID } from 'class-validator';
-import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
+import { ValidRoles } from '../auth/enums/valid-roles.enum';
 
 @Injectable()
 export class EventService {
