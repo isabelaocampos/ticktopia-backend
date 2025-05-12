@@ -14,6 +14,7 @@ import { TicketModule } from './ticket/ticket.module';
 import { HealthController } from './health/health.controller';
 import { SuccessController } from './success/success.controller';
 import { FailedController } from './failed/failed.controller';
+import { ReportModule } from './report/report.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -32,7 +33,8 @@ import { FailedController } from './failed/failed.controller';
     AuthModule,
     EventModule,
     PresentationModule,
-    TicketModule
+    TicketModule,
+    ReportModule
   ],
   controllers: [HealthController, SuccessController, FailedController],
   providers: [],

@@ -22,6 +22,7 @@ export class SeedService {
     const eventManagers = users.filter(result => result?.user.roles.includes(ValidRoles.eventManager))
     const eventManagerIds = eventManagers.map((eventManager) => eventManager!.user.id);
     const events = await this.insertNewEvents(eventManagerIds);
+    console.log(events);
     const eventsIds = events.map((event) => event.id);
     const presentations = await this.insertNewPresentations(eventsIds);
     const presentationIds = presentations.map((presentation) => presentation.idPresentation);
@@ -51,7 +52,7 @@ export class SeedService {
 
     events.forEach(event => {
       const randomManagerId = eventManagerIds[Math.floor(Math.random() * eventManagerIds.length)];
-      insertPromises.push(this.eventService.create({ ...event, userId: randomManagerId }));
+      insertPromises.push(this.eventService.create({ ...event, userId: randomManagerId }) as Promise<Event>);
     });
 
     return await Promise.all(insertPromises);
@@ -66,6 +67,7 @@ export class SeedService {
 
     presentations.forEach(presentation => {
       const eventId = eventIds[eventIndex];
+      console.log(eventId)
       insertPromises.push(this.presentationService.create({ ...presentation, eventId }));
       eventIndex = (eventIndex + 1) % eventIds.length;
     });
@@ -79,7 +81,6 @@ export class SeedService {
 
     const combinations = [
       { isActive: false, isRedeemed: false },
-      { isActive: false, isRedeemed: true },
       { isActive: true, isRedeemed: false },
       { isActive: true, isRedeemed: true }
     ];
