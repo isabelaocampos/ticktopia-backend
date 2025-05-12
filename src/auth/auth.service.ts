@@ -150,8 +150,9 @@ export class AuthService {
     if (!updatedUser) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-
-    return this.userRepository.save(updatedUser);
+    await this.userRepository.save(updatedUser)
+    delete updatedUser.password
+    return updatedUser;
   }
 
 
