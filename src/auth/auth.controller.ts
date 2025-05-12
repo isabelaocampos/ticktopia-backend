@@ -11,6 +11,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { LoginUserDto } from './dto/Login-user.dto';
 import { FindOneUserDto } from './dto/find-one-user.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { UpdateRoleDto } from './dto/update-roles.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -78,6 +79,13 @@ export class AuthController {
     }
 
     return this.authService.deleteUserById(params.id);
+  }
+
+  @Auth(ValidRoles.admin)
+  @Put('users/roles/:id')
+  updateRolesToUser(@Param() params: FindOneUserDto, @Body() roles: UpdateRoleDto) {
+    return this.authService.updateUserRoles(roles, params.id);
+
   }
 
 }

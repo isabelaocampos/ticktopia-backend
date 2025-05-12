@@ -10,6 +10,7 @@ import { LoginUserDto } from './dto/Login-user.dto';
 import { plainToInstance } from 'class-transformer';
 import { UserDto } from './dto/find-user.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { UpdateRoleDto } from './dto/update-roles.dto';
 
 @Injectable()
 export class AuthService {
@@ -173,6 +174,19 @@ export class AuthService {
     return this.userRepository.save(updatedUser);
   }
 
+
+  async updateUserRoles({ roles }: UpdateRoleDto, userId: string) {
+  const user = await this.userRepository.findOneBy({ id: userId });
+
+  if (!user) {
+    throw new NotFoundException(`User with ID ${userId} not found`);
+  }
+
+  user.roles = roles;
+  await this.userRepository.save(user);
+  delete user.password;
+  return user;
+}
 
 
 
