@@ -43,26 +43,6 @@ export class AuthService {
     }
   }
 
-  async createEventManger(createAuthDto: CreateAuthDto) {
-    const { password, ...userData } = createAuthDto;
-    try {
-      const user = this.userRepository.create({
-        ...{ ...userData, roles: ["event-manaeger"] },
-        password: bcrypt.hashSync(password, 10)
-      });
-      await this.userRepository.save(user);
-      delete user.password;
-
-      return {
-        user: user,
-        token: this.getJwtToken({ id: user.id })
-      };
-
-
-    } catch (error) {
-      this.handleExceptions(error);
-    }
-  }
 
   async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
@@ -83,9 +63,10 @@ export class AuthService {
       token: this.getJwtToken({ id: user.id })
     }
   }
+
   async deleteAllUsers(): Promise<{ message: string }> {
     try {
-      await this.userRepository.delete({});  // Ahora puedes eliminar los usuarios
+      await this.userRepository.delete({});
       return { message: 'All users and their events have been deleted successfully' };
     } catch (error) {
       this.logger.error('Failed to delete all users', error.stack);
@@ -113,7 +94,6 @@ export class AuthService {
   async findAll() {
     const users = await this.userRepository.find();
     return plainToInstance(UserDto, users);
-
   }
 
   private getJwtToken(payload: JwtPayload) {

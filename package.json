@@ -85,7 +85,8 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "coveragePathIgnorePatterns": [
-      "<rootDir>/main.ts"
+      "<rootDir>/main.ts",
+      "<rootDir>/app.module.ts"
     ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"

@@ -61,9 +61,8 @@ export class AuthController {
     @GetUser() user: User,
   ) {
     const isSelf = params.id === user.id;
-    const isAdmin = user.roles.includes(ValidRoles.admin);
 
-    if (!isSelf && !isAdmin) {
+    if (!isSelf) {
       throw new UnauthorizedException('You can only update your own profile');
     }
 
@@ -85,7 +84,6 @@ export class AuthController {
   @Put('users/roles/:id')
   updateRolesToUser(@Param() params: FindOneUserDto, @Body() roles: UpdateRoleDto) {
     return this.authService.updateUserRoles(roles, params.id);
-
   }
 
 }

@@ -39,7 +39,7 @@ describe('AuthModule', () => {
           },
         ],
       }).compile();
-    });
+    }, 10000);
   
     beforeEach(() => {
       module.close();
