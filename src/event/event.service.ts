@@ -35,8 +35,9 @@ export class EventService {
     }
 
     const newEvent = this.eventRepository.create(createEventDto);
-    await this.eventRepository.save({ ...newEvent, user });
-    return newEvent;
+    const createdEvent = await this.eventRepository.save({ ...newEvent, user });
+    return createdEvent;
+    
   } catch (error) {
     if (
       error instanceof NotFoundException ||
