@@ -166,7 +166,6 @@ async findOne(term: string, user: User): Promise<Event> {
 
   async deleteAll() {
     try {
-      console.log("evento deleteados")
       await this.eventRepository.delete({});
       return { message: `All events deleted successfully` };
     } catch (error) {
