@@ -9,7 +9,7 @@ import { ValidRoles } from "../../../src/auth/enums/valid-roles.enum";
 import { error } from "console";
 
 const testingCreateUser = {
-  email: 'gus@mail.com',
+  email: 'gussi@mail.com',
   password: 'Abc12345',
   name: 'Testing',
   lastname: 'user',

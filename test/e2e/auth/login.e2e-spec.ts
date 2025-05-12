@@ -54,9 +54,11 @@ describe('Auth - Login', () => {
       { email: testingAdminUser.email },
       { roles: ['admin'] },
     );
-  });
+  }, 10000);
 
   afterAll(async () => {
+    await userRepository.delete({ email: testingUser.email });
+    await userRepository.delete({ email: testingAdminUser.email });
     await app.close();
   });
 

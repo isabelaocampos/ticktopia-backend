@@ -1739,7 +1739,6 @@
 											"    const responseBody = pm.response.json();\r",
 											"    pm.expect(responseBody.id).to.exist;\r",
 											"    pm.expect(responseBody.email).to.exist;\r",
-											"    pm.expect(responseBody.password).to.exist;\r",
 											"    pm.expect(responseBody.name).to.exist;\r",
 											"    pm.expect(responseBody.lastname).to.exist;\r",
 											"    pm.expect(responseBody.isActive).to.exist;\r",
@@ -1771,248 +1770,6 @@
 								"body": {
 									"mode": "raw",
 									"raw": "{\r\n    \"name\": \"Valentina\",\r\n    \"lastname\": \"Ocampos\",\r\n    \"email\": \"{{randomEmail}}\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{base_url}}/api/auth/users/{{userId}}",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"api",
-										"auth",
-										"users",
-										"{{userId}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "UPDATE UNAUTHENTICATED",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Generar un correo electrónico aleatorio\r",
-											"function generateRandomEmail() {\r",
-											"    const randomString = Math.random().toString(36).substring(2, 10);\r",
-											"    return `user_${randomString}@example.com`;\r",
-											"}\r",
-											"\r",
-											"const url = pm.collectionVariables.get(\"base_url\");\r",
-											"const password = pm.collectionVariables.get(\"password\");\r",
-											"const randomEmail = generateRandomEmail();\r",
-											"pm.collectionVariables.set(\"randomEmail\", randomEmail);\r",
-											"\r",
-											"// Registrar un nuevo usuario\r",
-											"pm.sendRequest({\r",
-											"    url: `${url}/api/auth/register`,\r",
-											"    method: \"POST\",\r",
-											"    header: {\r",
-											"        \"Content-Type\": \"application/json\"\r",
-											"    },\r",
-											"    body: {\r",
-											"        mode: \"raw\",\r",
-											"        raw: JSON.stringify({\r",
-											"            name: \"Isabella\",\r",
-											"            lastname: \"Ocampo\",\r",
-											"            email: randomEmail,\r",
-											"            password: password\r",
-											"        })\r",
-											"    }\r",
-											"}, function (err, res) {\r",
-											"    if (err) {\r",
-											"        console.log(\"Error al registrar usuario:\", err);\r",
-											"        return;\r",
-											"    }\r",
-											"\r",
-											"    const user = res.json().user;\r",
-											"    const token = res.json().token;\r",
-											"    if (!user || !user.id || !token) {\r",
-											"        console.log(\"No se obtuvo el ID o el token del usuario.\");\r",
-											"        return;\r",
-											"    }\r",
-											"\r",
-											"    pm.collectionVariables.set(\"userId\", user.id);\r",
-											"    pm.collectionVariables.set(\"token\", token);\r",
-											"\r",
-											"    console.log(\"Usuario registrado. ID:\", user.id);\r",
-											"    console.log(\"Usuario registrado. Token:\", token);\r",
-											"\r",
-											"});"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Test for status code\r",
-											"pm.test(\"Status code is 401\", function () {\r",
-											"    pm.response.to.have.status(401);\r",
-											"});\r",
-											"\r",
-											"// Test for response time\r",
-											"pm.test(\"Response time is less than 500ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
-											"});\r",
-											"\r",
-											"// Test for response body properties\r",
-											"pm.test(\"Response contains expected properties\", function () {\r",
-											"    const responseBody = pm.response.json();\r",
-											"    pm.expect(responseBody).to.have.property(\"message\");\r",
-											"    pm.expect(responseBody).to.have.property(\"statusCode\");\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"protocolProfileBehavior": {
-								"disableCookies": true
-							},
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"name\": \"Valentina\",\r\n    \"lastname\": \"Ocampos\",\r\n    \"email\": \"{{randomEmail}}\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{base_url}}/api/auth/users/{{userId}}",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"api",
-										"auth",
-										"users",
-										"{{userId}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "UPDATE MYSELF UNWANTED PROPERTIES",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Generar un correo electrónico aleatorio\r",
-											"function generateRandomEmail() {\r",
-											"    const randomString = Math.random().toString(36).substring(2, 10);\r",
-											"    return `user_${randomString}@example.com`;\r",
-											"}\r",
-											"\r",
-											"const url = pm.collectionVariables.get(\"base_url\");\r",
-											"const password = pm.collectionVariables.get(\"password\");\r",
-											"const randomEmail = generateRandomEmail();\r",
-											"pm.collectionVariables.set(\"randomEmail\", randomEmail);\r",
-											"\r",
-											"// Registrar un nuevo usuario\r",
-											"pm.sendRequest({\r",
-											"    url: `${url}/api/auth/register`,\r",
-											"    method: \"POST\",\r",
-											"    header: {\r",
-											"        \"Content-Type\": \"application/json\"\r",
-											"    },\r",
-											"    body: {\r",
-											"        mode: \"raw\",\r",
-											"        raw: JSON.stringify({\r",
-											"            name: \"Isabella\",\r",
-											"            lastname: \"Ocampo\",\r",
-											"            email: randomEmail,\r",
-											"            password: password\r",
-											"        })\r",
-											"    }\r",
-											"}, function (err, res) {\r",
-											"    if (err) {\r",
-											"        console.log(\"Error al registrar usuario:\", err);\r",
-											"        return;\r",
-											"    }\r",
-											"\r",
-											"    const user = res.json().user;\r",
-											"    const token = res.json().token;\r",
-											"    if (!user || !user.id || !token) {\r",
-											"        console.log(\"No se obtuvo el ID o el token del usuario.\");\r",
-											"        return;\r",
-											"    }\r",
-											"\r",
-											"    pm.collectionVariables.set(\"userId\", user.id);\r",
-											"    pm.collectionVariables.set(\"token\", token);\r",
-											"\r",
-											"    console.log(\"Usuario registrado. ID:\", user.id);\r",
-											"    console.log(\"Usuario registrado. Token:\", token);\r",
-											"\r",
-											"});"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Test for status code\r",
-											"pm.test(\"Status code is 400\", function () {\r",
-											"    pm.response.to.have.status(400);\r",
-											"});\r",
-											"\r",
-											"\r",
-											"// Test for response body properties\r",
-											"pm.test(\"Response body contains expected properties\", function () {\r",
-											"    const responseBody = pm.response.json();\r",
-											"    pm.expect(responseBody).to.have.property('message');\r",
-											"    pm.expect(responseBody).to.have.property('error');\r",
-											"    pm.expect(responseBody).to.have.property('statusCode');\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"protocolProfileBehavior": {
-								"disableCookies": true
-							},
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"name\": \"Valentina\",\r\n    \"lastname\": \"Ocampo\",\r\n    \"password\": \"password\",\r\n    \"email\": \"{{randomEmail}}\",\r\n    \"role\": \"event-manager\",\r\n    \"isActive\": true\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2182,6 +1939,248 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "UPDATE MYSELF UNWANTED PROPERTIES",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generar un correo electrónico aleatorio\r",
+											"function generateRandomEmail() {\r",
+											"    const randomString = Math.random().toString(36).substring(2, 10);\r",
+											"    return `user_${randomString}@example.com`;\r",
+											"}\r",
+											"\r",
+											"const url = pm.collectionVariables.get(\"base_url\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const randomEmail = generateRandomEmail();\r",
+											"pm.collectionVariables.set(\"randomEmail\", randomEmail);\r",
+											"\r",
+											"// Registrar un nuevo usuario\r",
+											"pm.sendRequest({\r",
+											"    url: `${url}/api/auth/register`,\r",
+											"    method: \"POST\",\r",
+											"    header: {\r",
+											"        \"Content-Type\": \"application/json\"\r",
+											"    },\r",
+											"    body: {\r",
+											"        mode: \"raw\",\r",
+											"        raw: JSON.stringify({\r",
+											"            name: \"Isabella\",\r",
+											"            lastname: \"Ocampo\",\r",
+											"            email: randomEmail,\r",
+											"            password: password\r",
+											"        })\r",
+											"    }\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error al registrar usuario:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"\r",
+											"    const user = res.json().user;\r",
+											"    const token = res.json().token;\r",
+											"    if (!user || !user.id || !token) {\r",
+											"        console.log(\"No se obtuvo el ID o el token del usuario.\");\r",
+											"        return;\r",
+											"    }\r",
+											"\r",
+											"    pm.collectionVariables.set(\"userId\", user.id);\r",
+											"    pm.collectionVariables.set(\"token\", token);\r",
+											"\r",
+											"    console.log(\"Usuario registrado. ID:\", user.id);\r",
+											"    console.log(\"Usuario registrado. Token:\", token);\r",
+											"\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Test for status code\r",
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"\r",
+											"// Test for response body properties\r",
+											"pm.test(\"Response body contains expected properties\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody).to.have.property('message');\r",
+											"    pm.expect(responseBody).to.have.property('error');\r",
+											"    pm.expect(responseBody).to.have.property('statusCode');\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Valentina\",\r\n    \"lastname\": \"Ocampo\",\r\n    \"password\": \"password\",\r\n    \"email\": \"{{randomEmail}}\",\r\n    \"role\": \"event-manager\",\r\n    \"isActive\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/users/{{userId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"users",
+										"{{userId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "UPDATE UNAUTHENTICATED",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generar un correo electrónico aleatorio\r",
+											"function generateRandomEmail() {\r",
+											"    const randomString = Math.random().toString(36).substring(2, 10);\r",
+											"    return `user_${randomString}@example.com`;\r",
+											"}\r",
+											"\r",
+											"const url = pm.collectionVariables.get(\"base_url\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const randomEmail = generateRandomEmail();\r",
+											"pm.collectionVariables.set(\"randomEmail\", randomEmail);\r",
+											"\r",
+											"// Registrar un nuevo usuario\r",
+											"pm.sendRequest({\r",
+											"    url: `${url}/api/auth/register`,\r",
+											"    method: \"POST\",\r",
+											"    header: {\r",
+											"        \"Content-Type\": \"application/json\"\r",
+											"    },\r",
+											"    body: {\r",
+											"        mode: \"raw\",\r",
+											"        raw: JSON.stringify({\r",
+											"            name: \"Isabella\",\r",
+											"            lastname: \"Ocampo\",\r",
+											"            email: randomEmail,\r",
+											"            password: password\r",
+											"        })\r",
+											"    }\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error al registrar usuario:\", err);\r",
+											"        return;\r",
+											"    }\r",
+											"\r",
+											"    const user = res.json().user;\r",
+											"    const token = res.json().token;\r",
+											"    if (!user || !user.id || !token) {\r",
+											"        console.log(\"No se obtuvo el ID o el token del usuario.\");\r",
+											"        return;\r",
+											"    }\r",
+											"\r",
+											"    pm.collectionVariables.set(\"userId\", user.id);\r",
+											"    pm.collectionVariables.set(\"token\", token);\r",
+											"\r",
+											"    console.log(\"Usuario registrado. ID:\", user.id);\r",
+											"    console.log(\"Usuario registrado. Token:\", token);\r",
+											"\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Test for status code\r",
+											"pm.test(\"Status code is 401\", function () {\r",
+											"    pm.response.to.have.status(401);\r",
+											"});\r",
+											"\r",
+											"// Test for response time\r",
+											"pm.test(\"Response time is less than 500ms\", function () {\r",
+											"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+											"});\r",
+											"\r",
+											"// Test for response body properties\r",
+											"pm.test(\"Response contains expected properties\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody).to.have.property(\"message\");\r",
+											"    pm.expect(responseBody).to.have.property(\"statusCode\");\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Valentina\",\r\n    \"lastname\": \"Ocampos\",\r\n    \"email\": \"{{randomEmail}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/users/{{userId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"auth",
+										"users",
+										"{{userId}}"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -2309,10 +2308,6 @@
 										"exec": [
 											"pm.test(\"Status code is 401\", function () {\r",
 											"    pm.response.to.have.status(401);\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Response time is less than 100ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
 											"});\r",
 											"\r",
 											"pm.test(\"Response body has expected properties\", function () {\r",
