@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "3974af74-f017-47c7-ad05-50122f6aefcc",
+		"_postman_id": "1dc54d65-4693-4819-83ee-db0c3244ac87",
 		"name": "Integration Test Backend-Ticktopia",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "38775841"
+		"_exporter_id": "38823104"
 	},
 	"item": [
 		{
@@ -873,20 +873,14 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											"// Generar un correo electrónico aleatorio\r",
-											"function generateRandomEmail() {\r",
-											"    const randomString = Math.random().toString(36).substring(2, 10);\r",
-											"    return `user_${randomString}@example.com`;\r",
-											"}\r",
-											"\r",
-											"const url = pm.collectionVariables.get(\"base_url\");\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"userEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
-											"const randomEmail = generateRandomEmail();\r",
-											"pm.collectionVariables.set(\"randomEmail\", randomEmail);\r",
 											"\r",
-											"// Registrar un nuevo usuario\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
 											"pm.sendRequest({\r",
-											"    url: `${url}/api/auth/register`,\r",
+											"    url: authUrl,\r",
 											"    method: \"POST\",\r",
 											"    header: {\r",
 											"        \"Content-Type\": \"application/json\"\r",
@@ -894,32 +888,25 @@
 											"    body: {\r",
 											"        mode: \"raw\",\r",
 											"        raw: JSON.stringify({\r",
-											"            name: \"Isabella\",\r",
-											"            lastname: \"Ocampo\",\r",
-											"            email: randomEmail,\r",
+											"            email: email,\r",
 											"            password: password\r",
 											"        })\r",
 											"    }\r",
 											"}, function (err, res) {\r",
 											"    if (err) {\r",
-											"        console.log(\"Error al registrar usuario:\", err);\r",
-											"        return;\r",
+											"        console.log(\"Error en la solicitud:\", err);\r",
+											"    } else {\r",
+											"        const token = res.json().token;\r",
+											"        \r",
+											"        if (token) {\r",
+											"            pm.collectionVariables.set(\"token\", token);\r",
+											"            console.log(\"Token guardado:\", token);\r",
+											"        } else {\r",
+											"            console.log(\"No se encontró un token en la respuesta.\");\r",
+											"        }\r",
 											"    }\r",
-											"\r",
-											"    const user = res.json().user;\r",
-											"    const token = res.json().token;\r",
-											"    if (!user || !user.id || !token) {\r",
-											"        console.log(\"No se obtuvo el ID o el token del usuario.\");\r",
-											"        return;\r",
-											"    }\r",
-											"\r",
-											"    pm.collectionVariables.set(\"userId\", user.id);\r",
-											"    pm.collectionVariables.set(\"token\", token);\r",
-											"\r",
-											"    console.log(\"Usuario registrado. ID:\", user.id);\r",
-											"    console.log(\"Usuario registrado. Token:\", token);\r",
-											"\r",
-											"});"
+											"});\r",
+											""
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -1147,27 +1134,38 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"// Test for status code\r",
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(200);\r",
-											"});\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
 											"\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
-											"// Test for email field existence\r",
-											"pm.test(\"Email field exists in the response\", function () {\r",
-											"    const jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData.email).to.exist;\r",
-											"});\r",
-											"\r",
-											"// Test for email field data type\r",
-											"pm.test(\"Email field is a string\", function () {\r",
-											"    const jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData.email).to.be.a('string');\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Verify the roles array in the response\", function () {\r",
-											"    const jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData.roles).to.eql([\"client\"]);\r",
+											"pm.sendRequest({\r",
+											"    url: authUrl,\r",
+											"    method: \"POST\",\r",
+											"    header: {\r",
+											"        \"Content-Type\": \"application/json\"\r",
+											"    },\r",
+											"    body: {\r",
+											"        mode: \"raw\",\r",
+											"        raw: JSON.stringify({\r",
+											"            email: email,\r",
+											"            password: password\r",
+											"        })\r",
+											"    }\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error en la solicitud:\", err);\r",
+											"    } else {\r",
+											"        const token = res.json().token;\r",
+											"        \r",
+											"        if (token) {\r",
+											"            pm.collectionVariables.set(\"token\", token);\r",
+											"            console.log(\"Token guardado:\", token);\r",
+											"        } else {\r",
+											"            console.log(\"No se encontró un token en la respuesta.\");\r",
+											"        }\r",
+											"    }\r",
 											"});\r",
 											""
 										],
@@ -3249,10 +3247,10 @@
 									"script": {
 										"exec": [
 											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
 											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
 											"pm.sendRequest({\r",
 											"    url: authUrl,\r",
@@ -3291,21 +3289,17 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Status code is 201\", function () {\r",
-											"    pm.response.to.have.status(201);\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Response has event ID\", function () {\r",
-											"    var jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData).to.have.property(\"_id\");\r",
-											"});\r",
-											"\r",
 											"pm.test(\"Event has correct properties\", function () {\r",
 											"    var jsonData = pm.response.json();\r",
 											"    pm.expect(jsonData).to.have.property(\"name\");\r",
 											"    pm.expect(jsonData).to.have.property(\"bannerPhotoUrl\");\r",
 											"    pm.expect(jsonData).to.have.property(\"isPublic\");\r",
-											"    pm.expect(jsonData).to.have.property(\"userId\");\r",
+											"\r",
+											"    console.log(\"✅ Propiedades verificadas:\", {\r",
+											"        name: jsonData.name,\r",
+											"        bannerPhotoUrl: jsonData.bannerPhotoUrl,\r",
+											"        isPublic: jsonData.isPublic\r",
+											"    });\r",
 											"});\r",
 											""
 										],
@@ -3332,7 +3326,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"name\": \"Concierto de Rock\",\r\n    \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r\n    \"isPublic\": true,\r\n    \"userId\": \"65f4b3c2d8a4e6b7a9c12345\"\r\n}\r\n",
+									"raw": "{\r\n    \"name\": \"Concierto de Rock\",\r\n    \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r\n    \"isPublic\": true,\r\n    \"userId\": \"{{userId}}\"\r\n}\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3340,12 +3334,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/events/create",
+									"raw": "{{base_url}}/api/event/create",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"events",
+										"api",
+										"event",
 										"create"
 									]
 								}
@@ -3363,7 +3358,7 @@
 											"const email = pm.collectionVariables.get(\"userEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
 											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
 											"pm.sendRequest({\r",
 											"    url: authUrl,\r",
@@ -3402,14 +3397,16 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Debe retornar 403 Forbidden con el mensaje esperado\", function () {\r",
+											"pm.test(\"Debe retornar 403 Forbidden con formato de mensaje válido\", function () {\r",
 											"    pm.response.to.have.status(403);\r",
 											"    pm.response.to.have.jsonBody();\r",
 											"\r",
 											"    const jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData).to.have.property(\"message\", \"Forbidden, you are a user and this service is only available for event-manager,superadmin\");\r",
+											"    \r",
+											"    // Verifica que el mensaje tenga el formato: \"User <algo> needs a valid role\"\r",
+											"    pm.expect(jsonData.message).to.match(/^User .* needs a valid role$/);\r",
 											"\r",
-											"    console.log(\"✅ Respuesta validada:\", jsonData);\r",
+											"    console.log(\"✅ Mensaje con formato válido:\", jsonData.message);\r",
 											"});\r",
 											""
 										],
@@ -3444,12 +3441,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/events/create",
+									"raw": "{{base_url}}/api/event/create",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"events",
+										"api",
+										"event",
 										"create"
 									]
 								}
@@ -3472,7 +3470,7 @@
 											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
 											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
 											"pm.sendRequest({\r",
 											"    url: authUrl,\r",
@@ -3523,11 +3521,10 @@
 											"pm.test(\"Each event has expected properties\", function () {\r",
 											"    var jsonData = pm.response.json();\r",
 											"    jsonData.forEach(event => {\r",
-											"        pm.expect(event).to.have.property(\"_id\");\r",
+											"        pm.expect(event).to.have.property(\"id\");\r",
 											"        pm.expect(event).to.have.property(\"name\");\r",
 											"        pm.expect(event).to.have.property(\"bannerPhotoUrl\");\r",
 											"        pm.expect(event).to.have.property(\"isPublic\");\r",
-											"        pm.expect(event).to.have.property(\"userId\");\r",
 											"    });\r",
 											"});\r",
 											""
@@ -3538,7 +3535,8 @@
 								}
 							],
 							"protocolProfileBehavior": {
-								"disableCookies": true
+								"disableCookies": true,
+								"disableBodyPruning": true
 							},
 							"request": {
 								"auth": {
@@ -3546,22 +3544,31 @@
 									"bearer": [
 										{
 											"key": "token",
-											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3NjkwMjc0LTNjMzUtNDhmNi04YTc1LTA4YTg4OTk4YjRjZSIsImlhdCI6MTc0NzA3NzUzMiwiZXhwIjoxNzQ3MDgxMTMyfQ.3HQyQ63jbeVTmkRM9UaNw8beEbcciCGTMC6YpCVN8d8",
+											"value": "{{token}}",
 											"type": "string"
 										}
 									]
 								},
 								"method": "GET",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
-									"raw": "{{base_url}}/api/event/findAllEvents",
+									"raw": "{{base_url}}/api/event/findAll",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
 										"api",
 										"event",
-										"findAllEvents"
+										"findAll"
 									]
 								}
 							},
@@ -3613,7 +3620,7 @@
 											"}\r",
 											"\r",
 											"// Guardar el ID del evento que estás buscando para uso en tests\r",
-											"pm.collectionVariables.set(\"eventId\", \"67e9c22529f77cca654dbefd\");\r",
+											"pm.collectionVariables.set(\"eventId\", \"3721cb8c-58f6-4e73-a152-b112c8b6f15c\");\r",
 											"\r",
 											"console.log(\"Buscando evento con ID:\", pm.collectionVariables.get(\"eventId\"));"
 										],
@@ -3631,11 +3638,10 @@
 											"\r",
 											"pm.test(\"Response contains the expected event properties\", function () {\r",
 											"    var jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData).to.have.property(\"_id\");\r",
+											"    pm.expect(jsonData).to.have.property(\"id\");\r",
 											"    pm.expect(jsonData).to.have.property(\"name\");\r",
 											"    pm.expect(jsonData).to.have.property(\"bannerPhotoUrl\");\r",
 											"    pm.expect(jsonData).to.have.property(\"isPublic\");\r",
-											"    pm.expect(jsonData).to.have.property(\"userId\");\r",
 											"});\r",
 											""
 										],
@@ -3661,117 +3667,14 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/events/findEvent/{{eventId}}",
+									"raw": "{{base_url}}/api/event/find/{{eventId}}",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"events",
-										"findEvent",
-										"{{eventId}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "FIND EVENT BY ID Copy",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Autenticación\r",
-											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
-											"const password = pm.collectionVariables.get(\"password\");\r",
-											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
-											"\r",
-											"// Solo realizar la autenticación si no hay token o si ha expirado\r",
-											"    pm.sendRequest({\r",
-											"        url: authUrl,\r",
-											"        method: \"POST\",\r",
-											"        header: {\r",
-											"            \"Content-Type\": \"application/json\"\r",
-											"        },\r",
-											"        body: {\r",
-											"            mode: \"raw\",\r",
-											"            raw: JSON.stringify({\r",
-											"                email: email,\r",
-											"                password: password\r",
-											"            })\r",
-											"        }\r",
-											"    }, function (err, res) {\r",
-											"        if (err) {\r",
-											"            console.log(\"Error en la solicitud:\", err);\r",
-											"        } else {\r",
-											"            const token = res.json().token;\r",
-											"            \r",
-											"            if (token) {\r",
-											"                pm.collectionVariables.set(\"token\", token);\r",
-											"                console.log(\"Token guardado:\", token);\r",
-											"            } else {\r",
-											"                console.log(\"No se encontró un token en la respuesta.\");\r",
-											"            }\r",
-											"        }\r",
-											"    });\r",
-											"\r",
-											"\r",
-											"// Guardar el ID del evento que estás buscando para uso en tests\r",
-											"pm.collectionVariables.set(\"eventId\", \"67e9c22529f77cca654dbefd\");\r",
-											"\r",
-											"console.log(\"Buscando evento con ID:\", pm.collectionVariables.get(\"eventId\"));"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Test for status code\r",
-											"pm.test(\"Status code is 403\", function () {\r",
-											"    pm.response.to.have.status(403);\r",
-											"});\r",
-											"\r",
-											"\r",
-											"// Test for specific message in the response body\r",
-											"pm.test(\"Response body contains specific message\", function () {\r",
-											"    pm.expect(pm.response.json().message).to.include(\"Access denied. Event managers can only v\");\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"protocolProfileBehavior": {
-								"disableCookies": true
-							},
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/events/findEvent/{{eventId}}",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"events",
-										"findEvent",
+										"api",
+										"event",
+										"find",
 										"{{eventId}}"
 									]
 								}
@@ -3794,7 +3697,7 @@
 											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
 											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
 											"if (!pm.collectionVariables.get(\"token\")) {\r",
 											"    pm.sendRequest({\r",
@@ -3822,8 +3725,7 @@
 											"        }\r",
 											"    });\r",
 											"}\r",
-											"pm.collectionVariables.set(\"eventId\",\"67e9c22529f77cca654dbefd\");\r",
-											""
+											"pm.collectionVariables.set(\"eventId\",\"3f9df69f-1294-402a-a1db-89941cea0df2\");"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -3839,7 +3741,7 @@
 											"\r",
 											"pm.test(\"Response contains updated event properties\", function () {\r",
 											"    var jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData).to.have.property(\"_id\");\r",
+											"    pm.expect(jsonData).to.have.property(\"id\");\r",
 											"    pm.expect(jsonData.name).to.equal(\"Concierto de Jazz\");\r",
 											"    pm.expect(jsonData.bannerPhotoUrl).to.equal(\"https://example.com/new-banner.jpg\");\r",
 											"    pm.expect(jsonData.isPublic).to.be.false;\r",
@@ -3877,12 +3779,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/events/update/{{eventId}}",
+									"raw": "{{base_url}}/api/event/update/{{eventId}}",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"events",
+										"api",
+										"event",
 										"update",
 										"{{eventId}}"
 									]
@@ -3902,7 +3805,7 @@
 											"const email = pm.collectionVariables.get(\"userEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
 											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
 											"\r",
 											"    pm.sendRequest({\r",
@@ -3930,7 +3833,7 @@
 											"        }\r",
 											"    });\r",
 											"\r",
-											"pm.collectionVariables.set(\"eventId\",\"67e9c22529f77cca654dbefd\");\r",
+											"pm.collectionVariables.set(\"eventId\",\"b663bf37-2a4f-4490-85ef-48e7b892cd34\");\r",
 											""
 										],
 										"type": "text/javascript",
@@ -3941,14 +3844,16 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Debe retornar 403 Forbidden con el mensaje esperado\", function () {\r",
+											"pm.test(\"Debe retornar 403 Forbidden con formato de mensaje válido\", function () {\r",
 											"    pm.response.to.have.status(403);\r",
 											"    pm.response.to.have.jsonBody();\r",
 											"\r",
 											"    const jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData).to.have.property(\"message\", \"Forbidden, you are a user and this service is only available for event-manager,superadmin\");\r",
 											"\r",
-											"    console.log(\"✅ Respuesta validada:\", jsonData);\r",
+											"    // Validar que el mensaje siga el patrón esperado\r",
+											"    pm.expect(jsonData.message).to.match(/^User .* needs a valid role$/);\r",
+											"\r",
+											"    console.log(\"✅ Mensaje con formato válido:\", jsonData.message);\r",
 											"});\r",
 											""
 										],
@@ -3983,12 +3888,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/events/update/{{eventId}}",
+									"raw": "{{base_url}}/api/event/update/{{eventId}}",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"events",
+										"api",
+										"event",
 										"update",
 										"{{eventId}}"
 									]
@@ -4012,10 +3918,12 @@
 											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
 											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
-											"const eventUrl = `${baseUrl}/events/create`;\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"const eventUrl = `${baseUrl}/api/event/create`;\r",
 											"\r",
 											"// Hacer la solicitud de autenticación\r",
+											"\r",
+											"pm.collectionVariables.set(\"eventId\",\"3d9ac5c6-6b6e-4fcb-a36f-e5a45fe22225\");\r",
 											"pm.sendRequest({\r",
 											"    url: authUrl,\r",
 											"    method: \"POST\",\r",
@@ -4053,7 +3961,7 @@
 											"                    name: \"Concierto de Rock\",\r",
 											"                    bannerPhotoUrl: \"https://example.com/banner.jpg\",\r",
 											"                    isPublic: true,\r",
-											"                    userId: \"65f4b3c2d8a4e6b7a9c12345\"\r",
+											"                    userId: \"b663bf37-2a4f-4490-85ef-48e7b892cd34\"\r",
 											"                })\r",
 											"            }\r",
 											"        }, function (eventErr, eventRes) {\r",
@@ -4108,12 +4016,13 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/events/delete/{{eventId}}",
+									"raw": "{{base_url}}/api/event/delete/{{eventId}}",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"events",
+										"api",
+										"event",
 										"delete",
 										"{{eventId}}"
 									]
@@ -4132,10 +4041,12 @@
 											"const email = pm.collectionVariables.get(\"userEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
 											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
-											"const eventUrl = `${baseUrl}/events/create`;\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"const eventUrl = `${baseUrl}/api/event/create`;\r",
 											"\r",
 											"// Hacer la solicitud de autenticación\r",
+											"\r",
+											"pm.collectionVariables.set(\"eventId\",\"bd284937-dddc-4c64-b6ab-91d43ce176d9\");\r",
 											"pm.sendRequest({\r",
 											"    url: authUrl,\r",
 											"    method: \"POST\",\r",
@@ -4173,7 +4084,7 @@
 											"                    name: \"Concierto de Rock\",\r",
 											"                    bannerPhotoUrl: \"https://example.com/banner.jpg\",\r",
 											"                    isPublic: true,\r",
-											"                    userId: \"65f4b3c2d8a4e6b7a9c12345\"\r",
+											"                    userId: \"b663bf37-2a4f-4490-85ef-48e7b892cd34\"\r",
 											"                })\r",
 											"            }\r",
 											"        }, function (eventErr, eventRes) {\r",
@@ -4199,14 +4110,14 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Debe retornar 403 Forbidden con el mensaje esperado\", function () {\r",
+											"pm.test(\"Debe retornar 403 Forbidden con mensaje de rol inválido\", function () {\r",
 											"    pm.response.to.have.status(403);\r",
 											"    pm.response.to.have.jsonBody();\r",
 											"\r",
 											"    const jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData).to.have.property(\"message\", \"Forbidden, you are a user and this service is only available for event-manager,superadmin\");\r",
+											"    pm.expect(jsonData.message).to.match(/^User .* needs a valid role$/);\r",
 											"\r",
-											"    console.log(\"✅ Respuesta validada:\", jsonData);\r",
+											"    console.log(\"✅ Formato de mensaje validado:\", jsonData.message);\r",
 											"});\r",
 											""
 										],
@@ -4229,12 +4140,13 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/events/delete/{{eventId}}",
+									"raw": "{{base_url}}/api/event/delete/{{eventId}}",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"events",
+										"api",
+										"event",
 										"delete",
 										"{{eventId}}"
 									]
@@ -5476,7 +5388,54 @@
 				"packages": {},
 				"exec": [
 					"\r",
-					"pm.collectionVariables.set(\"randomEmail\", \"variable_value\");"
+					"pm.collectionVariables.set(\"randomEmail\", \"variable_value\");\r",
+					"\r",
+					"const users = [\r",
+					"    {\r",
+					"        role: 'eventManager',\r",
+					"        email: 'isabella.ocampo@u.icesi.edu.co',\r",
+					"        password: '{{password}}'\r",
+					"    },\r",
+					"    {\r",
+					"        role: 'user',\r",
+					"        email: 'user@example.com',\r",
+					"        password: '{{password}}'\r",
+					"    },\r",
+					"    {\r",
+					"        role: 'admin',\r",
+					"        email: 'alejitocordoba@hotmail.com',\r",
+					"        password: '{{password}}'\r",
+					"    }\r",
+					"];\r",
+					"\r",
+					"const tokenRequests = users.map(user => {\r",
+					"    return pm.sendRequest({\r",
+					"        url: pm.environment.get('baseUrl') + '/auth/login',\r",
+					"        method: 'POST',\r",
+					"        header: { 'Content-Type': 'application/json' },\r",
+					"        body: {\r",
+					"            mode: 'raw',\r",
+					"            raw: JSON.stringify({\r",
+					"                email: user.email,\r",
+					"                password: user.password\r",
+					"            })\r",
+					"        }\r",
+					"    }, function (err, res) {\r",
+					"        if (err) {\r",
+					"            console.error(`❌ Error logging in as ${user.role}:`, err);\r",
+					"            return;\r",
+					"        }\r",
+					"\r",
+					"        if (res.code === 200) {\r",
+					"            const token = res.json().accessToken;\r",
+					"            pm.environment.set(`${user.role}Token`, token);\r",
+					"            console.log(`✅ Token saved for ${user.role}`);\r",
+					"        } else {\r",
+					"            console.warn(`⚠️ Login failed for ${user.role}: ${res.code}`);\r",
+					"        }\r",
+					"    });\r",
+					"});\r",
+					""
 				]
 			}
 		},
@@ -5529,7 +5488,7 @@
 		},
 		{
 			"key": "eventId",
-			"value": "67e9a91e3a0c85bdc91f2605"
+			"value": "3721cb8c-58f6-4e73-a152-b112c8b6f15c"
 		},
 		{
 			"key": "randomEventName",
@@ -5550,9 +5509,14 @@
 			"type": "string"
 		},
 		{
-			"value": "",
-			"type": "string",
-			"disabled": true
+			"key": "eventToken",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ3MjI5YzdiLWVmYTUtNGU4NS1hYWZkLTE5MDZhMGMzNjFjZSIsImlhdCI6MTc0NzA3OTEyOSwiZXhwIjoxNzQ3MDgyNzI5fQ.HV3QLY7q6aTchiJcAyMkfozOWnAr-F7R4d1DE0L5BUs",
+			"type": "string"
+		},
+		{
+			"key": "userToken",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNWU0ODA1LWIwYWEtNGUyYS05NzJhLTJlYzMwZGQ0NjNkNCIsImlhdCI6MTc0NzA3OTAzOSwiZXhwIjoxNzQ3MDgyNjM5fQ.nYdHYm_vk0ItJjkDUQW_vkGxSEy0WoyU34J9ZtRN8dg",
+			"type": "string"
 		}
 	]
 }

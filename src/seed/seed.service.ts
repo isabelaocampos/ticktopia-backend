@@ -52,7 +52,7 @@ export class SeedService {
 
     events.forEach(event => {
       const randomManagerId = eventManagerIds[Math.floor(Math.random() * eventManagerIds.length)];
-      insertPromises.push(this.eventService.create({ ...event, userId: randomManagerId }));
+      insertPromises.push(this.eventService.create({ ...event, userId: randomManagerId }) as Promise<Event>);
     });
 
     return await Promise.all(insertPromises);

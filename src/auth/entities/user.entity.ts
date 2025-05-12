@@ -1,3 +1,4 @@
+import { Exclude } from "class-transformer";
 import { Event } from "../../event/entities/event.entity";
 import { Ticket } from "../../ticket/entities/ticket.entity";
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -12,6 +13,7 @@ export class User {
     })
     email: string;
 
+    @Exclude()
     @Column('text')
     password?: string;
 
