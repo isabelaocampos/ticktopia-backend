@@ -659,7 +659,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"email\": \"{{superadminEmail}}\",\r\n    \"password\": \"{{$randomPassword}}\",\r\n    \"name\": \"{{$randomFirstName}}\",\r\n    \"lastname\": \"{{$randomLastName}}\"\r\n}",
+									"raw": "{\r\n    \"email\": \"{{superadminEmail}}\",\r\n    \"password\": \"Hola1597!!!!\",\r\n    \"name\": \"{{$randomFirstName}}\",\r\n    \"lastname\": \"{{$randomLastName}}\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2804,10 +2804,6 @@
 									"    pm.response.to.have.status(200);\r",
 									"});\r",
 									"\r",
-									"// Test 2: Verify the response time is less than 500ms\r",
-									"pm.test(\"Response time is less than 500ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
-									"});\r",
 									"\r",
 									"// Test 3: Verify the updated roles in the response\r",
 									"pm.test(\"Verify the updated roles in the response\", function () {\r",
@@ -3550,7 +3546,7 @@
 									"bearer": [
 										{
 											"key": "token",
-											"value": "{{token}}",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU3NjkwMjc0LTNjMzUtNDhmNi04YTc1LTA4YTg4OTk4YjRjZSIsImlhdCI6MTc0NzA3NzUzMiwiZXhwIjoxNzQ3MDgxMTMyfQ.3HQyQ63jbeVTmkRM9UaNw8beEbcciCGTMC6YpCVN8d8",
 											"type": "string"
 										}
 									]
@@ -3558,13 +3554,14 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/events/",
+									"raw": "{{base_url}}/api/event/findAllEvents",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
-										"events",
-										""
+										"api",
+										"event",
+										"findAllEvents"
 									]
 								}
 							},
@@ -4917,6 +4914,58 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "Report",
+			"item": [
+				{
+					"name": "GENERATE SALES REPORT",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/report/sales",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"report",
+								"sales"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/seed",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"seed"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [

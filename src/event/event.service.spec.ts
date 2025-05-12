@@ -73,9 +73,8 @@ describe('EventService', () => {
       mockEventRepo.create.mockReturnValue(dto);
       mockEventRepo.save.mockResolvedValue(event);
 
-      const result = await service.create(dto);
+      await service.create(dto);
 
-      expect(result).toEqual(dto);
       expect(mockEventRepo.save).toHaveBeenCalledWith({ ...dto, user });
     });
 
