@@ -7,15 +7,19 @@ import {
   Param,
   Delete,
   InternalServerErrorException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { BuyTicketDto } from './dto/buy-ticket.dto';
-
 import { AuthService } from '../auth/auth.service';
 import { PresentationService } from '../presentation/presentation.service';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { ValidRoles } from '../auth/enums/valid-roles.enum';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { User } from '../auth/entities/user.entity';
 
 @ApiTags('Tickets')
 @Controller('tickets')
@@ -28,47 +32,61 @@ export class TicketController {
 
   @Post('admin')
   @ApiOperation({ summary: 'Create a ticket manually (admin)' })
-  async create(@Body() createTicketDto: CreateTicketDto) {
-    return this.ticketService.create(createTicketDto);
+  @ApiResponse({ status: 201, description: 'Ticket created' })
+  @Auth(ValidRoles.admin)
+  async create(@Body() dto: CreateTicketDto) {
+    return this.ticketService.create(dto);
   }
+
 
   @Post('buy')
   @ApiOperation({ summary: 'Buy a ticket (simulated)' })
-  async buyTicket(@Body() buyDto: BuyTicketDto) {
-    const user = await this.authService.findById(buyDto.userId);
-    const presentation = await this.presentationService.findOne(
-      buyDto.presentationId,
-    );
+  @ApiResponse({ status: 201, description: 'Ticket purchased' })
+  @ApiResponse({ status: 500, description: 'User or presentation not found' })
+  @Auth(ValidRoles.client)
+  async buyTicket(@Body() dto: BuyTicketDto, @GetUser() user: User) {
+    const presentation = await this.presentationService.findOne(dto.presentationId);
 
-    if (!user || !presentation) {
-      throw new InternalServerErrorException('User or Presentation not found');
+    if (!presentation) {
+      throw new InternalServerErrorException('Presentation not found');
     }
 
-    return this.ticketService.buyTicket(user.id, buyDto);
+    return this.ticketService.buyTicket(user.id, dto);
   }
 
+
   @Get()
-  @ApiOperation({ summary: 'Get all tickets (admin or dev)' })
+  @ApiOperation({ summary: 'Get all tickets (admin)' })
+  @ApiResponse({ status: 200, description: 'List of all tickets' })
+  @Auth(ValidRoles.admin)
   findAll() {
     return this.ticketService.findAll();
   }
 
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a ticket by ID' })
-  findOne(@Param('id') id: string) {
+  @ApiResponse({ status: 200, description: 'Ticket details' })
+  @ApiResponse({ status: 404, description: 'Ticket not found' })
+  @Auth(ValidRoles.admin, ValidRoles.client)
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.ticketService.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update a ticket' })
-  update(@Param('id') id: string, @Body() updateDto: UpdateTicketDto) {
-    return this.ticketService.update(id, updateDto);
+  @ApiResponse({ status: 200, description: 'Ticket updated' })
+  @Auth(ValidRoles.admin)
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateTicketDto) {
+    return this.ticketService.update(id, dto);
   }
 
-
+  // 🧨 Admin: Eliminar ticket manualmente
   @Delete(':id/delete')
-  @ApiOperation({ summary: 'Delete a ticket (dev)' })
-  remove(@Param('id') id: string) {
+  @ApiOperation({ summary: 'Delete a ticket (admin)' })
+  @ApiResponse({ status: 200, description: 'Ticket deleted' })
+  @Auth(ValidRoles.admin)
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.ticketService.remove(id);
   }
 }
