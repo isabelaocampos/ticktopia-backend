@@ -2,7 +2,6 @@ import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../../auth/entities/user.entity";
 import { Presentation } from "../../presentation/entities/presentation.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Event } from "../../event/entities/event.entity";
 
 @Entity()
 export class Ticket {
@@ -23,6 +22,10 @@ export class Ticket {
     @Column({ type: 'boolean' })
     isActive: boolean;
 
+    @Column({ type: 'int', default: 1 })
+    quantity: number;
+
+
     @ManyToOne(
         () => User,
         (user) => user.tickets,
@@ -37,10 +40,4 @@ export class Ticket {
         { cascade: true, eager: true, nullable: false }
     )
     presentation: Presentation;
-
-    @ManyToOne(() => Event, event => event.tickets, { onDelete: 'CASCADE' })
-    event: Event;
-
-    @Column('uuid')
-    eventId: string;
 }

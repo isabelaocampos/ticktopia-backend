@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { IsUUID, IsInt, Min } from 'class-validator';
 
 export class BuyTicketDto {
   @ApiProperty({
@@ -8,4 +8,12 @@ export class BuyTicketDto {
   })
   @IsUUID()
   presentationId: string;
+
+  @ApiProperty({
+    example: 2,
+    description: 'Number of tickets to buy',
+  })
+  @IsInt()
+  @Min(1)
+  quantity: number;
 }

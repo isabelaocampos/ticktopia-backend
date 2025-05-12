@@ -7,7 +7,7 @@ import { User } from '../auth/entities/user.entity';
 import { DataSource, DeepPartial, Repository } from 'typeorm';
 // Removed duplicate import of CreateEventDto
 import { isUUID } from 'class-validator';
-import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
+import { ValidRoles } from '../auth/enums/valid-roles.enum';
 
 @Injectable()
 export class EventService {
@@ -166,12 +166,8 @@ async findOne(term: string, user: User): Promise<Event> {
 
   async deleteAll() {
     try {
-      const events = await this.eventRepository.find();
-      if (events.length === 0) {
-        return { message: 'No events to delete' };
-      }
-      await this.eventRepository.remove(events);
-      return { message: `${events.length} event(s) deleted successfully` };
+      await this.eventRepository.delete({});
+      return { message: `All events deleted successfully` };
     } catch (error) {
       this.logger.error('Error deleting all events', error.stack);
       throw new InternalServerErrorException('Error deleting all events');

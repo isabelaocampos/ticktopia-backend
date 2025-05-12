@@ -1,53 +1,92 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, InternalServerErrorException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  InternalServerErrorException,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
-import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
-import { PresentationService } from '../presentation/presentation.service';
+import { BuyTicketDto } from './dto/buy-ticket.dto';
 import { AuthService } from '../auth/auth.service';
+import { PresentationService } from '../presentation/presentation.service';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { ValidRoles } from '../auth/enums/valid-roles.enum';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { User } from '../auth/entities/user.entity';
 
+@ApiTags('Tickets')
 @Controller('tickets')
 export class TicketController {
-  constructor(private readonly ticketService: TicketService, private readonly presentationService: PresentationService, private readonly userService: AuthService) { }
+  constructor(
+    private readonly ticketService: TicketService,
+    private readonly authService: AuthService,
+    private readonly presentationService: PresentationService,
+  ) {}
 
-  @Post()
-  create(@Body() createTicketDto: CreateTicketDto) {
-    return this.ticketService.create(createTicketDto);
+  @Post('admin')
+  @ApiOperation({ summary: 'Create a ticket manually (admin)' })
+  @ApiResponse({ status: 201, description: 'Ticket created' })
+  @Auth(ValidRoles.admin)
+  async create(@Body() dto: CreateTicketDto) {
+    return this.ticketService.create(dto);
   }
 
-  @Post("checkout")
-  async createCheckoutSession(@Body() createTicketDto: CreateCheckoutSessionDto) {
-    const presentation = await this.presentationService.findOne(createTicketDto.presentationId);
+
+  @Post('buy')
+  @ApiOperation({ summary: 'Buy a ticket (simulated)' })
+  @ApiResponse({ status: 201, description: 'Ticket purchased' })
+  @ApiResponse({ status: 500, description: 'User or presentation not found' })
+  @Auth(ValidRoles.client)
+  async buyTicket(@Body() dto: BuyTicketDto, @GetUser() user: User) {
+    const presentation = await this.presentationService.findOne(dto.presentationId);
+
     if (!presentation) {
-      throw new InternalServerErrorException("Presentation not found")
+      throw new InternalServerErrorException('Presentation not found');
     }
 
-    const user = await this.userService.findById(createTicketDto.userId);
-    if (!user) {
-      throw new InternalServerErrorException("User not found")
-
-    }
-    const stripeData = await this.ticketService.createCheckoutSession(createTicketDto.quantity, user, presentation);
-    return stripeData.url;
+    return this.ticketService.buyTicket(user.id, dto);
   }
+
 
   @Get()
+  @ApiOperation({ summary: 'Get all tickets (admin)' })
+  @ApiResponse({ status: 200, description: 'List of all tickets' })
+  @Auth(ValidRoles.admin)
   findAll() {
     return this.ticketService.findAll();
   }
 
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  @ApiOperation({ summary: 'Get a ticket by ID' })
+  @ApiResponse({ status: 200, description: 'Ticket details' })
+  @ApiResponse({ status: 404, description: 'Ticket not found' })
+  @Auth(ValidRoles.admin, ValidRoles.client)
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.ticketService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
-    return this.ticketService.update(id, updateTicketDto);
+  @ApiOperation({ summary: 'Update a ticket' })
+  @ApiResponse({ status: 200, description: 'Ticket updated' })
+  @Auth(ValidRoles.admin)
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateTicketDto) {
+    return this.ticketService.update(id, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  // 🧨 Admin: Eliminar ticket manualmente
+  @Delete(':id/delete')
+  @ApiOperation({ summary: 'Delete a ticket (admin)' })
+  @ApiResponse({ status: 200, description: 'Ticket deleted' })
+  @Auth(ValidRoles.admin)
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.ticketService.remove(id);
   }
 }

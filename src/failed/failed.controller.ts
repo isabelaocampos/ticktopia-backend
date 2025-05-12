@@ -1,4 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
 @Controller('failed')
-export class FailedController {}
+export class FailedController {
+
+    @Get()
+    showFailure(){
+        return "PAGO FALLIDO"
+    }
+}

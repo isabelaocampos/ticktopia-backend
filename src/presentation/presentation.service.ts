@@ -18,21 +18,23 @@ export class PresentationService {
     private readonly eventRepository: Repository<Event>,
   ) {}
 
-  async create(createPresentationDto: CreatePresentationDto) {
-    try {
-      const event = await this.eventRepository.findOneBy({ id: createPresentationDto.eventId});
+async create(createPresentationDto: CreatePresentationDto) {
+  const event = await this.eventRepository.findOneBy({ id: createPresentationDto.eventId });
 
-      if (!event) {
-        throw new NotFoundException(`Event with ID ${createPresentationDto.eventId} not found`);
-      }
-      const newPresentation = this.presentationRepository.create({...createPresentationDto, event: event});
-      await this.presentationRepository.save(newPresentation);
-      return newPresentation;
-    } catch (error) {
-      this.logger.error('Error creating presentation', error.stack);
-      throw new InternalServerErrorException('Error creating presentation');
-    }
+  if (!event) {
+    throw new NotFoundException(`Event with ID ${createPresentationDto.eventId} not found`);
   }
+
+  try {
+    const newPresentation = this.presentationRepository.create({ ...createPresentationDto, event });
+    await this.presentationRepository.save(newPresentation);
+    return newPresentation;
+  } catch (error) {
+    this.logger.error('Error creating presentation', error.stack);
+    throw new InternalServerErrorException('Error creating presentation');
+  }
+}
+
 
   async findAll() {
     try {
@@ -67,17 +69,26 @@ export class PresentationService {
 
   async remove(id: string) {
     try {
+      // Verificamos si la presentación existe
       const presentationToRemove = await this.findOne(id);
       if (!presentationToRemove) {
         throw new NotFoundException(`Presentation with ID ${id} not found`);
       }
+
+      // Intentamos eliminar la presentación
       await this.presentationRepository.remove(presentationToRemove);
       return presentationToRemove;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        // Re-lanzamos la excepción NotFoundException sin transformarla
+        throw error;
+      }
+      // Capturamos cualquier otro tipo de error y lo convertimos en InternalServerErrorException
       this.logger.error(`Error deleting presentation with ID ${id}`, error.stack);
       throw new InternalServerErrorException('Error deleting presentation');
     }
   }
+
 
   async deleteAll(): Promise<{ message: string }> {
     try {
