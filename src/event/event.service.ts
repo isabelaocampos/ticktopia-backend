@@ -8,6 +8,7 @@ import { DataSource, DeepPartial, Repository } from 'typeorm';
 // Removed duplicate import of CreateEventDto
 import { isUUID } from 'class-validator';
 import { ValidRoles } from '../auth/enums/valid-roles.enum';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class EventService {
@@ -22,34 +23,45 @@ export class EventService {
   ) { }
 
   async create(createEventDto: CreateEventDto) {
-  try {
-    const user = await this.userRepository.findOneBy({ id: createEventDto.userId });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    try {
+      const user = await this.userRepository.findOneBy({ id: createEventDto.userId });
 
-    const allowedRoles = [ValidRoles.eventManager, ValidRoles.admin];
-    const hasPermission = user.roles.some(role => allowedRoles.includes(role as ValidRoles));
-    if (!hasPermission) {
-      throw new ForbiddenException('User does not have permission to create an event');
-    }
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
 
-    const newEvent = this.eventRepository.create(createEventDto);
-    const createdEvent = await this.eventRepository.save({ ...newEvent, user });
-    return createdEvent;
-    
-  } catch (error) {
-    if (
-      error instanceof NotFoundException ||
-      error instanceof ForbiddenException ||
-      error instanceof BadRequestException
-    ) {
-      throw error;
+      const allowedRoles = [ValidRoles.eventManager, ValidRoles.admin];
+      const hasPermission = user.roles.some(role => allowedRoles.includes(role as ValidRoles));
+
+      if (!hasPermission) {
+        throw new ForbiddenException('User does not have permission to create an event');
+      }
+
+      const newEvent = this.eventRepository.create(createEventDto);
+      const createdEvent = await this.eventRepository.save({ ...newEvent, user });
+
+      // 🧹 Eliminar manualmente el password antes de enviar la respuesta
+      if (createdEvent.user) {
+        delete createdEvent.user.password;
+      }
+
+      // 🧾 Transformar el objeto en uno plano si usas class-transformer
+      return instanceToPlain(createdEvent);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      this.logger.error('Error creating event', error.stack);
+      throw new InternalServerErrorException('Error creating event');
     }
-    this.logger.error('Error creating event', error.stack);
-    throw new InternalServerErrorException('Error creating event');
   }
-}
+
+
 
 async update(id: string, updateEventDto: UpdateEventDto, user: User) {
   try {
@@ -142,14 +154,17 @@ async findOne(term: string, user: User): Promise<Event> {
 
 
   async findAll(limit = 10, offset = 0) {
-        try{
-            return await this.eventRepository.find({
-                take: limit,
-                skip: offset
-            });
-        }catch(error){
-            this.handleExceptions(error);
-        }
+    try {
+      const events = await this.eventRepository.find({
+        take: limit,
+        skip: offset,
+        relations: ['user'], // importante
+      });
+
+      return instanceToPlain(events); // quita los campos con @Exclude
+    } catch (error) {
+      this.handleExceptions(error);
+    }
   }
 
   async findAllByUserId(userId: string) {

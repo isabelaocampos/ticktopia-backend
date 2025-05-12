@@ -8,6 +8,7 @@ import {
   Body,
   Query,
   ParseUUIDPipe,
+  Put,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { EventService } from './event.service';
@@ -34,7 +35,7 @@ export class EventController {
   }
 
   @Get('findAll')
-  @Auth(ValidRoles.admin)
+  @Auth(ValidRoles.admin, ValidRoles.eventManager)
   @ApiResponse({ status: 200, description: 'All events returned' })
   findAll(@Query('limit') limit: string, @Query('offset') offset: string) {
     const parsedLimit = parseInt(limit, 10) || 10;
@@ -54,7 +55,7 @@ export class EventController {
     return this.EventService.findOne(term, user);
   }
 
-  @Patch('update/:id')
+  @Put('update/:id')
   @Auth(ValidRoles.admin, ValidRoles.eventManager)
   update(
     @Param('id', ParseUUIDPipe) id: string,
