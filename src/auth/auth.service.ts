@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/Login-user.dto';
 import { plainToInstance } from 'class-transformer';
 import { UserDto } from './dto/find-user.dto';
+import { UpdateAuthDto } from './dto/update-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +38,6 @@ export class AuthService {
 
 
     } catch (error) {
-      console.log("error login", error);
       this.handleExceptions(error);
     }
   }
@@ -59,7 +59,6 @@ export class AuthService {
 
 
     } catch (error) {
-      console.log("error login", error);
       this.handleExceptions(error);
     }
   }
@@ -67,10 +66,9 @@ export class AuthService {
   async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
     const user = await this.userRepository.findOne({
-      where: { email },
-      select: { email: true, password: true, id: true }
+      where: { email, isActive: true },
+      select: { email: true, password: true, id: true, isActive: true }
     });
-    console.log(user)
 
     if (!user) throw new UnauthorizedException(`User with email ${email} not found`);
 
@@ -129,5 +127,53 @@ export class AuthService {
     this.logger.error(error.detail);
     throw new InternalServerErrorException('Unspected error, check your server logs');
   }
+
+  async deleteUserById(id: string): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: {}
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    if (user.isActive === false) {
+      throw new BadRequestException(`User with ID ${id} is already deactivated`);
+    }
+
+    user.isActive = false;
+    await this.userRepository.save(user);
+    return { message: `User with ID ${id} has been deactivated successfully` };
+  }
+
+  async updateUser(id: string, updateAuthDto: UpdateAuthDto) {
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    if (updateAuthDto.email && updateAuthDto.email !== user.email) {
+      const existingUser = await this.userRepository.findOneBy({ email: updateAuthDto.email });
+      if (existingUser && existingUser.id !== id) {
+        throw new BadRequestException(`Email ${updateAuthDto.email} is already in use`);
+      }
+    }
+
+    const updatedUser = await this.userRepository.preload({
+      id,
+      ...updateAuthDto,
+    });
+
+    if (!updatedUser) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return this.userRepository.save(updatedUser);
+  }
+
+
+
 
 }
