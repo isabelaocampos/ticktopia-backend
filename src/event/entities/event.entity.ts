@@ -25,7 +25,7 @@ export class Event {
   @Column('text')
   name: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   @Column({ type: 'varchar', length: 255 }) // más realista para URLs largas
   bannerPhotoUrl: string;
 
@@ -33,7 +33,7 @@ export class Event {
   @Column({ type: 'boolean' })
   isPublic: boolean;
 
-  @ManyToOne(() => User, user => user.events, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.events, { onDelete: 'CASCADE', cascade: true, eager: true, nullable: false })
   @JoinColumn({ name: 'User_idUser' })
   user: User;
 
@@ -41,12 +41,12 @@ export class Event {
   presentations: Presentation[];
 
   checkFieldsBeforeInsert() {
-  if (this.name) this.name = this.name.trim();
-  if (this.bannerPhotoUrl) this.bannerPhotoUrl = this.bannerPhotoUrl.trim().toLowerCase();
-}
+    if (this.name) this.name = this.name.trim();
+    if (this.bannerPhotoUrl) this.bannerPhotoUrl = this.bannerPhotoUrl.trim().toLowerCase();
+  }
 
-checkFieldsBeforeUpdate() {
-  this.checkFieldsBeforeInsert();
-}
+  checkFieldsBeforeUpdate() {
+    this.checkFieldsBeforeInsert();
+  }
 
 }
