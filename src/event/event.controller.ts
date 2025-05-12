@@ -24,7 +24,7 @@ import { ValidRoles } from '../auth/enums/valid-roles.enum';
 export class EventController {
   constructor(private readonly EventService: EventService) {}
 
-  @Post('createEvent')
+  @Post('create')
   @ApiResponse({ status: 201, description: 'Event was created' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Auth(ValidRoles.admin, ValidRoles.eventManager)
@@ -33,7 +33,7 @@ export class EventController {
     return this.EventService.create({ ...createEventDto, userId: user.id });
   }
 
-  @Get('findAllEvents')
+  @Get('findAll')
   @Auth(ValidRoles.admin)
   @ApiResponse({ status: 200, description: 'All events returned' })
   findAll(@Query('limit') limit: string, @Query('offset') offset: string) {
@@ -42,19 +42,19 @@ export class EventController {
     return this.EventService.findAll(parsedLimit, parsedOffset);
   }
 
-  @Get('findEvents/user/:userId')
+  @Get('find/user/:userId')
   @Auth(ValidRoles.admin, ValidRoles.eventManager)
   findAllByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.EventService.findAllByUserId(userId);
   }
 
-  @Get('findEvent/:term')
+  @Get('find/:term')
   @Auth(ValidRoles.admin, ValidRoles.eventManager)
   findOne(@Param('term') term: string, @GetUser() user: User) {
     return this.EventService.findOne(term, user);
   }
 
-  @Patch('updateEvent/:id')
+  @Patch('update/:id')
   @Auth(ValidRoles.admin, ValidRoles.eventManager)
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -64,7 +64,7 @@ export class EventController {
     return this.EventService.update(id, updateEventDto, user);
   }
 
-  @Delete('deleteEvent/:id')
+  @Delete('delete/:id')
   @ApiResponse({ status: 200, description: 'Event was removed' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 403, description: 'Forbidden. Token related.' })
@@ -73,7 +73,7 @@ export class EventController {
     return this.EventService.remove(id, user);
   }
 
-  @Delete('deleteAllEvents')
+  @Delete('deleteAll')
   @ApiResponse({ status: 200, description: 'All events removed' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
