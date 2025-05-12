@@ -4920,6 +4920,264 @@
 			"item": [
 				{
 					"name": "GENERATE SALES REPORT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test for status code\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"// Test for presence of fields in 'ticketsPorVendedor'\r",
+									"const response = pm.response.json();\r",
+									"pm.test(\"Verify presence of fields in 'ticketsPorVendedor'\", function () {\r",
+									"    pm.expect(response.ticketsPorVendedor).to.be.an('array').that.is.not.empty;\r",
+									"    response.ticketsPorVendedor.forEach((ticket) => {\r",
+									"        pm.expect(ticket).to.have.property('userId');\r",
+									"        pm.expect(ticket).to.have.property('userName');\r",
+									"        pm.expect(ticket).to.have.property('userLastname');\r",
+									"        pm.expect(ticket).to.have.property('totalTickets');\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"// Test for presence of fields in 'ticketsPorEvento'\r",
+									"pm.test(\"Verify presence of fields in 'ticketsPorEvento'\", function () {\r",
+									"    pm.expect(response.ticketsPorEvento).to.be.an('array').that.is.not.empty;\r",
+									"    response.ticketsPorEvento.forEach((ticket) => {\r",
+									"        pm.expect(ticket).to.have.property('eventId');\r",
+									"        pm.expect(ticket).to.have.property('eventName');\r",
+									"        pm.expect(ticket).to.have.property('totalTickets');\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+									"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+									"const password = pm.collectionVariables.get(\"password\");\r",
+									"\r",
+									"const authUrl = `${baseUrl}/api/auth/login`;\r",
+									"\r",
+									"pm.sendRequest({\r",
+									"    url: authUrl,\r",
+									"    method: \"POST\",\r",
+									"    header: {\r",
+									"        \"Content-Type\": \"application/json\"\r",
+									"    },\r",
+									"    body: {\r",
+									"        mode: \"raw\",\r",
+									"        raw: JSON.stringify({\r",
+									"            email: email,\r",
+									"            password: password\r",
+									"        })\r",
+									"    }\r",
+									"}, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.log(\"Error en la solicitud:\", err);\r",
+									"    } else {\r",
+									"        const token = res.json().token;\r",
+									"        \r",
+									"        if (token) {\r",
+									"            pm.collectionVariables.set(\"token\", token);\r",
+									"            console.log(\"Token guardado:\", token);\r",
+									"        } else {\r",
+									"            console.log(\"No se encontró un token en la respuesta.\");\r",
+									"        }\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableCookies": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/report/sales",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"report",
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE SALES REPORT NOT ADMIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response body has the expected fields\", function () {\r",
+									"    const responseBody = pm.response.json();\r",
+									"    pm.expect(responseBody).to.have.property(\"message\");\r",
+									"    pm.expect(responseBody).to.have.property(\"error\");\r",
+									"    pm.expect(responseBody).to.have.property(\"statusCode\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generar un correo electrónico aleatorio\r",
+									"function generateRandomEmail() {\r",
+									"    const randomString = Math.random().toString(36).substring(2, 10);\r",
+									"    return `user_${randomString}@example.com`;\r",
+									"}\r",
+									"\r",
+									"const url = pm.collectionVariables.get(\"base_url\");\r",
+									"const password = pm.collectionVariables.get(\"password\");\r",
+									"const randomEmail = generateRandomEmail();\r",
+									"pm.collectionVariables.set(\"randomEmail\", randomEmail);\r",
+									"\r",
+									"// Registrar un nuevo usuario\r",
+									"pm.sendRequest({\r",
+									"    url: `${url}/api/auth/register`,\r",
+									"    method: \"POST\",\r",
+									"    header: {\r",
+									"        \"Content-Type\": \"application/json\"\r",
+									"    },\r",
+									"    body: {\r",
+									"        mode: \"raw\",\r",
+									"        raw: JSON.stringify({\r",
+									"            name: \"Isabella\",\r",
+									"            lastname: \"Ocampo\",\r",
+									"            email: randomEmail,\r",
+									"            password: password\r",
+									"        })\r",
+									"    }\r",
+									"}, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.log(\"Error al registrar usuario:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    const user = res.json().user;\r",
+									"    const token = res.json().token;\r",
+									"    if (!user || !user.id || !token) {\r",
+									"        console.log(\"No se obtuvo el ID o el token del usuario.\");\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    pm.collectionVariables.set(\"userId\", user.id);\r",
+									"    pm.collectionVariables.set(\"token\", token);\r",
+									"\r",
+									"    console.log(\"Usuario registrado. ID:\", user.id);\r",
+									"    console.log(\"Usuario registrado. Token:\", token);\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableCookies": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/report/sales",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"report",
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE SALES REPORT UNAUTHENTICATED",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test for status code\r",
+									"pm.test(\"Status code is 401\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"// Test for response body message\r",
+									"pm.test(\"Response body has message field\", function () {\r",
+									"    const responseBody = pm.response.json();\r",
+									"    pm.expect(responseBody.message).to.exist;\r",
+									"    pm.expect(responseBody.message).to.equal(\"Unauthorized\");\r",
+									"});\r",
+									"\r",
+									"// Test for response body statusCode\r",
+									"pm.test(\"Response body has statusCode field\", function () {\r",
+									"    const responseBody = pm.response.json();\r",
+									"    pm.expect(responseBody.statusCode).to.exist;\r",
+									"    pm.expect(responseBody.statusCode).to.equal(401);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableCookies": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4936,36 +5194,278 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "GENERATE OCUPATION REPORT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test for status code\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"// Test for specific fields in the response\r",
+									"pm.test(\"Each item has the required fields\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    response.forEach(item => {\r",
+									"        pm.expect(item).to.have.property(\"eventId\");\r",
+									"        pm.expect(item).to.have.property(\"eventName\");\r",
+									"        pm.expect(item).to.have.property(\"totalTickets\");\r",
+									"        pm.expect(item).to.have.property(\"redeemedTickets\");\r",
+									"        pm.expect(item).to.have.property(\"activeTickets\");\r",
+									"        pm.expect(item).to.have.property(\"redeemedToActiveRatio\");\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+									"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+									"const password = pm.collectionVariables.get(\"password\");\r",
+									"\r",
+									"const authUrl = `${baseUrl}/api/auth/login`;\r",
+									"\r",
+									"pm.sendRequest({\r",
+									"    url: authUrl,\r",
+									"    method: \"POST\",\r",
+									"    header: {\r",
+									"        \"Content-Type\": \"application/json\"\r",
+									"    },\r",
+									"    body: {\r",
+									"        mode: \"raw\",\r",
+									"        raw: JSON.stringify({\r",
+									"            email: email,\r",
+									"            password: password\r",
+									"        })\r",
+									"    }\r",
+									"}, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.log(\"Error en la solicitud:\", err);\r",
+									"    } else {\r",
+									"        const token = res.json().token;\r",
+									"        \r",
+									"        if (token) {\r",
+									"            pm.collectionVariables.set(\"token\", token);\r",
+									"            console.log(\"Token guardado:\", token);\r",
+									"        } else {\r",
+									"            console.log(\"No se encontró un token en la respuesta.\");\r",
+									"        }\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableCookies": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/report/ocupation",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"report",
+								"ocupation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE OCUPATION REPORT NOT ADMIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test for status code\r",
+									"pm.test(\"Status code is 403\", function () {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"// Test for error message\r",
+									"pm.test(\"Error message is present\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.error).to.equal(\"Forbidden\");\r",
+									"});\r",
+									"\r",
+									"// Test for message field\r",
+									"pm.test(\"Message field is present\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property('message');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generar un correo electrónico aleatorio\r",
+									"function generateRandomEmail() {\r",
+									"    const randomString = Math.random().toString(36).substring(2, 10);\r",
+									"    return `user_${randomString}@example.com`;\r",
+									"}\r",
+									"\r",
+									"const url = pm.collectionVariables.get(\"base_url\");\r",
+									"const password = pm.collectionVariables.get(\"password\");\r",
+									"const randomEmail = generateRandomEmail();\r",
+									"pm.collectionVariables.set(\"randomEmail\", randomEmail);\r",
+									"\r",
+									"// Registrar un nuevo usuario\r",
+									"pm.sendRequest({\r",
+									"    url: `${url}/api/auth/register`,\r",
+									"    method: \"POST\",\r",
+									"    header: {\r",
+									"        \"Content-Type\": \"application/json\"\r",
+									"    },\r",
+									"    body: {\r",
+									"        mode: \"raw\",\r",
+									"        raw: JSON.stringify({\r",
+									"            name: \"Isabella\",\r",
+									"            lastname: \"Ocampo\",\r",
+									"            email: randomEmail,\r",
+									"            password: password\r",
+									"        })\r",
+									"    }\r",
+									"}, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.log(\"Error al registrar usuario:\", err);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    const user = res.json().user;\r",
+									"    const token = res.json().token;\r",
+									"    if (!user || !user.id || !token) {\r",
+									"        console.log(\"No se obtuvo el ID o el token del usuario.\");\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    pm.collectionVariables.set(\"userId\", user.id);\r",
+									"    pm.collectionVariables.set(\"token\", token);\r",
+									"\r",
+									"    console.log(\"Usuario registrado. ID:\", user.id);\r",
+									"    console.log(\"Usuario registrado. Token:\", token);\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableCookies": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/report/ocupation",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"report",
+								"ocupation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GENERATE OCUPATION REPORT UNAUTHENTICATED",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test for status code\r",
+									"pm.test(\"Status code is 401\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"// Test for unauthorized message\r",
+									"pm.test(\"Response message is Unauthorized\", function () {\r",
+									"    pm.expect(pm.response.json().message).to.equal(\"Unauthorized\");\r",
+									"});\r",
+									"\r",
+									"// Test for statusCode field\r",
+									"pm.test(\"Response statusCode is 401\", function () {\r",
+									"    pm.expect(pm.response.json().statusCode).to.equal(401);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableCookies": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/report/ocupation",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"report",
+								"ocupation"
+							]
+						}
+					},
+					"response": []
 				}
 			]
-		},
-		{
-			"name": "New Request",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/api/seed",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"api",
-						"seed"
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"event": [

@@ -81,7 +81,6 @@ export class SeedService {
 
     const combinations = [
       { isActive: false, isRedeemed: false },
-      { isActive: false, isRedeemed: true },
       { isActive: true, isRedeemed: false },
       { isActive: true, isRedeemed: true }
     ];
