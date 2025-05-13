@@ -61,7 +61,8 @@ describe('TicketController', () => {
   });
 
   it('should return all tickets', async () => {
-    await expect(controller.findAll()).resolves.toEqual(['ticket1', 'ticket2']);
+    const user = { id: 'user1' };
+    await expect(controller.findAll(user as any)).resolves.toEqual(['ticket1', 'ticket2']);
     expect(service.findAll).toHaveBeenCalled();
   });
 
@@ -76,8 +77,8 @@ describe('TicketController', () => {
   });
 
   it('should call update', async () => {
-    await expect(controller.update('123', { isActive: false })).resolves.toBe('ticket updated');
-    expect(service.update).toHaveBeenCalledWith('123', { isActive: false });
+    await expect(controller.update('123', { isRedeemed: true })).resolves.toBe('ticket updated');
+    expect(service.update).toHaveBeenCalledWith('123', { isRedeemed: true });
   });
 
   it('should throw if presentation is not found in buyTicket', async () => {

@@ -1,5 +1,6 @@
 export enum ValidRoles{
     admin = 'admin',
     eventManager = 'event-manager',
-    client = 'client'
+    client = 'client',
+    ticketChecker = 'ticketChecker'
 }

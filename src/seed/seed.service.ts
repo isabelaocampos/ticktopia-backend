@@ -22,14 +22,19 @@ export class SeedService {
     const eventManagers = users.filter(result => result?.user.roles.includes(ValidRoles.eventManager))
     const eventManagerIds = eventManagers.map((eventManager) => eventManager!.user.id);
     const events = await this.insertNewEvents(eventManagerIds);
-    console.log(events);
     const eventsIds = events.map((event) => event.id);
     const presentations = await this.insertNewPresentations(eventsIds);
     const presentationIds = presentations.map((presentation) => presentation.idPresentation);
     const clients = users.filter(result => result?.user.roles.includes(ValidRoles.client))
     const clientsIds = clients.map((client) => client!.user.id);
-    await this.insertNewTickets(presentationIds, clientsIds);
-    return 'SEED EXECUTED';
+    const tickets = await this.insertNewTickets(presentationIds, clientsIds);
+    const activeTicketIds = tickets
+      .filter(ticket => ticket.isActive)
+      .map(ticket => ticket.id);
+    const unactiveTicketIds = tickets
+      .filter(ticket => !ticket.isActive)
+      .map(ticket => ticket.id);
+    return { message: "SEED EXECUTED", activeTicketIds, unactiveTicketIds};
   }
 
   async insertNewUsers() {
@@ -67,7 +72,6 @@ export class SeedService {
 
     presentations.forEach(presentation => {
       const eventId = eventIds[eventIndex];
-      console.log(eventId)
       insertPromises.push(this.presentationService.create({ ...presentation, eventId }));
       eventIndex = (eventIndex + 1) % eventIds.length;
     });

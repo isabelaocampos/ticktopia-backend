@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonsModule } from './commons/commons.module';
@@ -15,6 +15,8 @@ import { HealthController } from './health/health.controller';
 import { SuccessController } from './success/success.controller';
 import { FailedController } from './failed/failed.controller';
 import { ReportModule } from './report/report.module';
+import { WebhookController } from './webhook/webhook.controller';
+import { WebhookModule } from './webhook/webhook.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -34,9 +36,12 @@ import { ReportModule } from './report/report.module';
     EventModule,
     PresentationModule,
     TicketModule,
-    ReportModule
+    ReportModule,
+    WebhookModule
   ],
-  controllers: [HealthController, SuccessController, FailedController],
+  controllers: [HealthController, SuccessController, FailedController, WebhookController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+
+}

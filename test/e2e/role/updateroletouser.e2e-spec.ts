@@ -108,7 +108,7 @@ describe('UserModule DeleteById (e2e)', () => {
         expect(response.body).toEqual({
             error: "Bad Request",
             message: [
-                "each value in roles must be one of the following values: admin, event-manager, client"
+                "each value in roles must be one of the following values: admin, event-manager, client, ticketChecker"
             ],
             statusCode: 400
         });

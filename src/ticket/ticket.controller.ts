@@ -5,10 +5,14 @@ import {
   Body,
   Patch,
   Param,
+  Headers,
   Delete,
   InternalServerErrorException,
   ParseUUIDPipe,
   Put,
+  NotFoundException,
+  UnauthorizedException,
+  Req,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -21,15 +25,19 @@ import { Auth } from '../auth/decorators/auth.decorator';
 import { ValidRoles } from '../auth/enums/valid-roles.enum';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '../auth/entities/user.entity';
+import Stripe from 'stripe';
 
 @ApiTags('Tickets')
 @Controller('tickets')
 export class TicketController {
+
   constructor(
     private readonly ticketService: TicketService,
     private readonly authService: AuthService,
     private readonly presentationService: PresentationService,
-  ) {}
+
+  ) {
+  }
 
   @Post('admin')
   @ApiOperation({ summary: 'Create a ticket manually (admin)' })
@@ -49,7 +57,7 @@ export class TicketController {
     const presentation = await this.presentationService.findOne(dto.presentationId);
 
     if (!presentation) {
-      throw new InternalServerErrorException('Presentation not found');
+      throw new NotFoundException('Presentation not found');
     }
 
     return this.ticketService.buyTicket(user.id, dto);
@@ -59,9 +67,9 @@ export class TicketController {
   @Get()
   @ApiOperation({ summary: 'Get all tickets (admin)' })
   @ApiResponse({ status: 200, description: 'List of all tickets' })
-  @Auth(ValidRoles.admin)
-  findAll() {
-    return this.ticketService.findAll();
+  @Auth(ValidRoles.client)
+  findAll(@GetUser() user: User) {
+    return this.ticketService.findAll(user);
   }
 
 
@@ -77,7 +85,7 @@ export class TicketController {
   @Put(':id')
   @ApiOperation({ summary: 'Update a ticket' })
   @ApiResponse({ status: 200, description: 'Ticket updated' })
-  @Auth(ValidRoles.admin)
+  @Auth(ValidRoles.ticketChecker)
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateTicketDto) {
     return this.ticketService.update(id, dto);
   }
