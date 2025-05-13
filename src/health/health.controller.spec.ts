@@ -7,7 +7,7 @@ import { AuthGuard, PassportModule } from '@nestjs/passport';
 import { UserRoleGuard } from '../auth/guards/user-role/user-role.guard';
 import { HealthController } from './health.controller';
 
-describe('EventController', () => {
+describe('HealthController', () => {
     let controller: HealthController;
 
     beforeEach(async () => {
@@ -17,9 +17,9 @@ describe('EventController', () => {
             ],
             controllers: [HealthController],
         })
-            .overrideGuard(AuthGuard('jwt')) // Sobreescribir el AuthGuard
+            .overrideGuard(AuthGuard('jwt')) 
             .useValue({ canActivate: jest.fn().mockReturnValue(true) })
-            .overrideGuard(UserRoleGuard) // Sobreescribir el UserRoleGuard
+            .overrideGuard(UserRoleGuard) 
             .useValue({ canActivate: jest.fn().mockReturnValue(true) })
             .compile();
 

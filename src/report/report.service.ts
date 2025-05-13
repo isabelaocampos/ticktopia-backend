@@ -4,11 +4,36 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Ticket } from '../ticket/entities/ticket.entity';
 import { Repository } from 'typeorm';
 
+export interface SalesReport {
+  ticketsPorEvento: {
+    eventId: string;
+    eventName: string;
+    totalTickets: string;
+  }[];
+  ticketsPorVendedor: {
+    userId: string;
+    userName: string;
+    userLastname: string;
+    totalTickets: string;
+  }[]
+
+}
+
+
+export interface OcupationReport {
+  eventId: string;
+  eventName: string;
+  totalTickets: string;
+  redeemedTickets: string;
+  activeTickets: string;
+  redeemedToActiveRatio: string;
+}
+
 @Injectable()
 export class ReportService {
   constructor(@InjectRepository(Ticket) private ticketRepo: Repository<Ticket>) { }
 
-  async generateSalesReport() {
+  async generateSalesReport(): Promise<SalesReport> {
     const ticketsPorEvento = await this.ticketRepo
       .createQueryBuilder('ticket')
       .innerJoin('ticket.presentation', 'presentation')
@@ -39,7 +64,7 @@ export class ReportService {
   }
 
 
-  async generateOcupationReport() {
+  async generateOcupationReport(): Promise<OcupationReport[]> {
     const resumenPorEvento = await this.ticketRepo
       .createQueryBuilder('ticket')
       .innerJoin('ticket.presentation', 'presentation')
