@@ -18,22 +18,41 @@ describe('Tickets - Update (e2e)', () => {
     await app.init();
 
     const res = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: 'ticket3@mail.com', password: 'Abc12345', name: 'User', lastname: 'Test' });
+      .post('/api/auth/register')
+      .send({ email: 'adminupdate@test.com', password: 'Hola1597!!!', name: 'Update', lastname: 'Admin' });
+
     token = res.body.token;
 
-    const event = await request(app.getHttpServer())
-      .post('/event/createEvent')
+    await request(app.getHttpServer())
+      .put(`/api/auth/users/roles/${res.body.user.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Event2', bannerPhotoUrl: 'url', isPublic: true });
+      .send({ roles: ['admin'] });
+
+    const eventRes = await request(app.getHttpServer())
+      .post('/api/event/createEvent')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'EventUp', bannerPhotoUrl: 'url', isPublic: true });
 
     const presentation = await request(app.getHttpServer())
-      .post('/presentation')
+      .post('/api/presentation')
       .set('Authorization', `Bearer ${token}`)
-      .send({ place: 'Arena', eventId: event.body.id, latitude: 0, longitude: 0, description: 'desc', openDate: new Date(), startDate: new Date(), ticketAvailabilityDate: new Date(), ticketSaleAvailabilityDate: new Date(), city: 'City', capacity: 100, price: 100 });
+      .send({
+        place: 'Arena',
+        eventId: eventRes.body.id,
+        latitude: 0,
+        longitude: 0,
+        description: 'desc',
+        openDate: new Date(),
+        startDate: new Date(),
+        ticketAvailabilityDate: new Date(),
+        ticketSaleAvailabilityDate: new Date(),
+        city: 'City',
+        capacity: 100,
+        price: 100,
+      });
 
     const buy = await request(app.getHttpServer())
-      .post('/tickets/buy')
+      .post('/api/tickets/buy')
       .set('Authorization', `Bearer ${token}`)
       .send({ presentationId: presentation.body.idPresentation, quantity: 1 });
 
@@ -42,7 +61,7 @@ describe('Tickets - Update (e2e)', () => {
 
   it('should update a ticket', async () => {
     const res = await request(app.getHttpServer())
-      .patch(`/tickets/${ticketId}`)
+      .patch(`/api/tickets/${ticketId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ isRedeemed: true });
 
