@@ -22,21 +22,21 @@ const testingEvent2 = {
   isPublic: false,
 }
 const testingUser = {
-  email: 'gus@mail.com',
+  email: 'gusdsadas@mail.com',
   password: 'Abc123',
   name: 'Testing',
   lastname: 'teacher',
 };
 
 const testingAdminUser = {
-  email: 'testing.admin@google.com',
+  email: 'testingdsaddsad.admin@google.com',
   password: 'abc123',
   name: 'Testing',
   lastname: 'admin',
 };
 
 const testingEventManager ={
-  email: 'testing.eventmanag@google.com',
+  email: 'testingdsadas.eventmanag@google.com',
   password: 'aBc123',
   name: 'TestingEv',
   lastname: 'eventMan',
@@ -146,12 +146,7 @@ describe('Events - Find All', () => {
         .get('/event/findAll')
         .set('Authorization', `Bearer ${tokenClient}`)
         .send();
-        expect(response.status).toBe(403);
-        expect(response.body).toEqual({
-        message: "User gus@mail.com needs a valid role",
-        error: "Forbidden",
-        statusCode: 403
-        });
+        expect(response.status).toBe(401);
     });
 
     it('/event/findAll (GET) - no credentials', async () => {

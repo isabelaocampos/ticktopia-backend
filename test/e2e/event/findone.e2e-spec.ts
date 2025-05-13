@@ -19,21 +19,21 @@ const testingEvent2 = {
   isPublic: false,
 }
 const testingUser = {
-  email: 'gus@mail.com',
+  email: 'gussdadaagsdas@mail.com',
   password: 'Abc123',
   name: 'Testing',
   lastname: 'teacher',
 };
 
 const testingAdminUser = {
-  email: 'testing.admin@google.com',
+  email: 'testsdagasdasdasding.admin@google.com',
   password: 'abc123',
   name: 'Testing',
   lastname: 'admin',
 };
 
 const testingEventManager ={
-  email: 'testing.eventmanag@google.com',
+  email: 'testingsdadasdasdsdadas.eventmanag@google.com',
   password: 'aBc123',
   name: 'TestingEv',
   lastname: 'eventMan',
