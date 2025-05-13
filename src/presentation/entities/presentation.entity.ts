@@ -20,7 +20,12 @@ export class Presentation {
     @ManyToOne(
         () => Event,
         (event) => event.presentations,
-        { cascade: true, eager: true, nullable: false }
+        {
+            cascade: true,
+            eager: true,
+            nullable: false,
+            onDelete: 'CASCADE', // <- Esto es lo que faltaba
+        }
     )
     event: Event;
 

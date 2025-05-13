@@ -43,7 +43,7 @@ const testingEventManager ={
 
 };
 
-describe('Events - Create', () => {
+describe('Events - Find All', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;
   let eventRepository: Repository<Event>;
@@ -132,103 +132,37 @@ describe('Events - Create', () => {
     await app.close();
   });
 
-  it('/event/create (POST) - create event with event manager credentials', async () => {
-    const eventResponse = await request(app.getHttpServer())
-    .post('/event/create')
-    .set('Authorization', `Bearer ${tokenEventManager}`)
-    .send({
-      ...testingEvent,
-      userId: eventManagerId
-    }).expect(201);
-
-    expect(eventResponse.body).toHaveProperty('id');
-    expect(eventResponse.body.name).toBe(testingEvent.name);
-  });
-
-  it('/event/create (POST) - should return 401 if admin tries to create event', async () => {
-    const eventResponse = await request(app.getHttpServer())
-      .post('/event/create')
-      .set('Authorization', `Bearer ${tokenAdmin}`)
-      .send({
-        ...testingEvent2,
-        userId: adminId
-      })
-      .expect(401); 
-
-    expect(eventResponse.body.message).toMatch('Unauthorized');
-  });
-
-
-  it('/event/create (POST) - create event with client credentials (wrong credentials), expected 403 --', async () => {
-    const eventResponse = await request(app.getHttpServer())
-    .post('/event/create')
-    .set('Authorization', `Bearer ${tokenClient}`)
-    .send({
-      ...testingEvent,
-      userId: clientId
-    }).expect(403);
-    
-    expect(eventResponse.body.message).toMatch(/^User .* needs a valid role$/);
-  });
-
-  it('/event/create (POST) - create event without token (unauthorized), expected 401', async () => {
-    const eventResponse = await request(app.getHttpServer())
-    .post('/event/create')
-    .send({
-      ...testingEvent,
-      userId: clientId
-    }).expect(401);
-    
-    expect(eventResponse.body.message).toBe('Unauthorized');
-  });
-
-  it('event/create (POST) - create event with unexisting userId (not found), expected 404', async () => {
-    const fakeUserId = '11111111-1111-1111-1111-111111111111';
-
-    const eventResponse = await request(app.getHttpServer())
-    .post('/event/create')
-    .set('Authorization', `Bearer ${tokenEventManager}`)
-    .send({
-      ...testingEvent,
-      userId : fakeUserId
-    }).expect(404);
-    
-    expect(eventResponse.body.message).toBe('User not found');
-  });
-
-  it('event/create (POST) - expected 400 with missing a requiered field', async () => {
-    const { name, ...incompleteDto } = testingEvent;
-
+  it('/event/findAll (GET) - valid credentials return all events', async () => {
     const response = await request(app.getHttpServer())
-      .post('/event/create')
+      .get('/event/findAll')
       .set('Authorization', `Bearer ${tokenEventManager}`)
-      .send({
-        ...incompleteDto,
-        userId: eventManagerId,
-      })
-      .expect(400);
-
-    expect(response.body.message).toContain('name should not be empty');
-
+      .send();
+    expect(response.status).toBe(200);
+    expect(response.body).toBeTruthy();
   });
 
-  it('event/create (POST) - expected 400 if userId is not a UUID', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/event/create')
-      .set('Authorization', `Bearer ${tokenEventManager}`)
-      .send({
-        ...testingEvent,
-        userId: 'not-a-uuid',
-      })
-      .expect(400);
+    it('/event/findAll (GET) - invalid credentials', async () => {
+        const response = await request(app.getHttpServer())
+        .get('/event/findAll')
+        .set('Authorization', `Bearer ${tokenClient}`)
+        .send();
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({
+        message: "User gus@mail.com needs a valid role",
+        error: "Forbidden",
+        statusCode: 403
+        });
+    });
 
-    expect(response.body.message).toContain('userId must be a UUID');
-
-  });
-
-
-
-
-
+    it('/event/findAll (GET) - no credentials', async () => {
+        const response = await request(app.getHttpServer())
+        .get('/event/findAll')
+        .send();
+        expect(response.status).toBe(401);
+        expect(response.body).toEqual({
+        message: "Unauthorized",
+        statusCode: 401
+        });
+    });
 
 });
