@@ -1,9 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ReportService } from './report.service';
-import { CreateReportDto } from './dto/create-report.dto';
-import { UpdateReportDto } from './dto/update-report.dto';
-import { Auth } from 'src/auth/decorators/auth.decorator';
-import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
+
+import { Auth } from '../auth/decorators/auth.decorator';
+import { ValidRoles } from '../auth/enums/valid-roles.enum';
 
 @Controller('report')
 export class ReportController {
@@ -11,13 +10,13 @@ export class ReportController {
 
   @Get("sales")
   @Auth(ValidRoles.admin)
-  create() {
+  generateSalesReport() {
     return this.reportService.generateSalesReport();
   }
 
   @Get("ocupation")
   @Auth(ValidRoles.admin)
-  findAll() {
+  generateOcupationReport() {
     return this.reportService.generateOcupationReport();
   }
 }
