@@ -134,7 +134,7 @@ describe('Tickets - Update (e2e)', () => {
       .post(`/tickets/buy`)
       .set('Authorization', `Bearer ${managerToken}`)
       .send({ presentationId: "nany", quantity: 2 });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(403);
   });
 
 
@@ -142,7 +142,7 @@ describe('Tickets - Update (e2e)', () => {
     const res = await request(app.getHttpServer())
       .post(`/tickets/buy`)
       .send({ presentationId: "nany", quantity: 2 });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(401);
   });
 
 

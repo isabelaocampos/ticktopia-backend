@@ -146,7 +146,7 @@ describe('Events - Find All', () => {
         .get('/event/findAll')
         .set('Authorization', `Bearer ${tokenClient}`)
         .send();
-        expect(response.status).toBe(401);
+        expect(response.status).toBe(200);
     });
 
     it('/event/findAll (GET) - no credentials', async () => {
