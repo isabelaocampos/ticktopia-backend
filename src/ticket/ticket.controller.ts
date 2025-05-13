@@ -8,6 +8,7 @@ import {
   Delete,
   InternalServerErrorException,
   ParseUUIDPipe,
+  Put,
 } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -73,7 +74,7 @@ export class TicketController {
     return this.ticketService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiOperation({ summary: 'Update a ticket' })
   @ApiResponse({ status: 200, description: 'Ticket updated' })
   @Auth(ValidRoles.admin)

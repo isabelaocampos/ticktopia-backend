@@ -56,7 +56,7 @@ export class PresentationController {
   @ApiOperation({ summary: 'Get a presentation by ID' })
   @ApiResponse({ status: 200, description: 'Presentation details' })
   @ApiResponse({ status: 404, description: 'Presentation not found' })
-  @Auth(ValidRoles.admin, ValidRoles.eventManager, ValidRoles.client)
+  @Auth(ValidRoles.admin, ValidRoles.eventManager)
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     try {
       const presentation = await this.presentationService.findOne(id);
