@@ -27,11 +27,11 @@ export class Ticket {
 
 
     @ManyToOne(
-        () => User,
-        (user) => user.tickets,
-        { cascade: true, eager: true, nullable: false }
-    )
+        () => User, 
+        user => user.tickets, 
+        { onDelete: 'CASCADE' })
     user: User;
+
 
     
     @ManyToOne(
