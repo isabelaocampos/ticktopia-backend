@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "3803d28a-a3bd-46be-8260-3f09a587721a",
+		"_postman_id": "dee3ab20-6fe0-4039-aa88-bf2c6293ab04",
 		"name": "Integration Test Backend-Ticktopia",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "38727763"
+		"_exporter_id": "38775841"
 	},
 	"item": [
 		{
@@ -3326,7 +3326,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"name\": \"Concierto de Rock\",\r\n    \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r\n    \"isPublic\": true,\r\n    \"userId\": \"{{userId}}\"\r\n}\r\n",
+									"raw": "{\r\n    \"name\": \"Concierto de Rock\",\r\n    \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r\n    \"isPublic\": true\r\n}\r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3428,6 +3428,99 @@
 											"type": "string"
 										}
 									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Tech Conference\",\r\n    \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r\n    \"isPublic\": true,\r\n    \"userId\": \"user123\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/event/create",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"event",
+										"create"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CREATE EVENT NO AUTH",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"userEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"pm.sendRequest({\r",
+											"    url: authUrl,\r",
+											"    method: \"POST\",\r",
+											"    header: {\r",
+											"        \"Content-Type\": \"application/json\"\r",
+											"    },\r",
+											"    body: {\r",
+											"        mode: \"raw\",\r",
+											"        raw: JSON.stringify({\r",
+											"            email: email,\r",
+											"            password: password\r",
+											"        })\r",
+											"    }\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error en la solicitud:\", err);\r",
+											"    } else {\r",
+											"        const token = res.json().token;\r",
+											"        \r",
+											"        if (token) {\r",
+											"            pm.collectionVariables.set(\"token\", token);\r",
+											"            console.log(\"Token guardado:\", token);\r",
+											"        } else {\r",
+											"            console.log(\"No se encontró un token en la respuesta.\");\r",
+											"        }\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Debe retornar 401 Forbidden con formato de mensaje válido\", function () {\r",
+											"    pm.response.to.have.status(401);\r",
+											"    pm.response.to.have.jsonBody();\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
 								},
 								"method": "POST",
 								"header": [],
@@ -3581,15 +3674,47 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											"// Autenticación\r",
+											"// Variables de colección\r",
 											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const eventId = res.json().id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
 											"\r",
-											"// Solo realizar la autenticación si no hay token o si ha expirado\r",
-											"if (!pm.collectionVariables.get(\"token\")) {\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
 											"    pm.sendRequest({\r",
 											"        url: authUrl,\r",
 											"        method: \"POST\",\r",
@@ -3605,24 +3730,23 @@
 											"        }\r",
 											"    }, function (err, res) {\r",
 											"        if (err) {\r",
-											"            console.log(\"Error en la solicitud:\", err);\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
 											"        } else {\r",
 											"            const token = res.json().token;\r",
-											"            \r",
 											"            if (token) {\r",
 											"                pm.collectionVariables.set(\"token\", token);\r",
 											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
 											"            } else {\r",
 											"                console.log(\"No se encontró un token en la respuesta.\");\r",
 											"            }\r",
 											"        }\r",
 											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente); // Crear evento directamente si ya hay token\r",
 											"}\r",
-											"\r",
-											"// Guardar el ID del evento que estás buscando para uso en tests\r",
-											"pm.collectionVariables.set(\"eventId\", \"3721cb8c-58f6-4e73-a152-b112c8b6f15c\");\r",
-											"\r",
-											"console.log(\"Buscando evento con ID:\", pm.collectionVariables.get(\"eventId\"));"
+											""
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -3680,26 +3804,55 @@
 								}
 							},
 							"response": []
-						}
-					]
-				},
-				{
-					"name": "PUT",
-					"item": [
+						},
 						{
-							"name": "UPDATE EXISTING EVENT",
+							"name": "FIND EVENT BY ID NOT FOUND",
 							"event": [
 								{
 									"listen": "prerequest",
 									"script": {
 										"exec": [
+											"// Variables de colección\r",
 											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
-											"\r",
 											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
-											"if (!pm.collectionVariables.get(\"token\")) {\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const eventId = res.json().id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
 											"    pm.sendRequest({\r",
 											"        url: authUrl,\r",
 											"        method: \"POST\",\r",
@@ -3715,17 +3868,165 @@
 											"        }\r",
 											"    }, function (err, res) {\r",
 											"        if (err) {\r",
-											"            console.log(\"Error en la solicitud:\", err);\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
 											"        } else {\r",
 											"            const token = res.json().token;\r",
 											"            if (token) {\r",
 											"                pm.collectionVariables.set(\"token\", token);\r",
 											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente); // Crear evento directamente si ya hay token\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Código de estado debe ser 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"El cuerpo debe contener mensaje de error correcto\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property(\"error\", \"Not Found\");\r",
+											"    pm.expect(jsonData).to.have.property(\"statusCode\", 404);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event/find/{{$randomUUID}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"event",
+										"find",
+										"{{$randomUUID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "PUT",
+					"item": [
+						{
+							"name": "UPDATE EXISTING EVENT MINE",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            console.log(\"evento\", res.json())\r",
+											"            const eventId = res.json().id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
 											"            }\r",
 											"        }\r",
 											"    });\r",
 											"}\r",
-											"pm.collectionVariables.set(\"eventId\",\"3f9df69f-1294-402a-a1db-89941cea0df2\");"
+											"\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: email,\r",
+											"                password: password\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
+											"        } else {\r",
+											"            const token = res.json().token;\r",
+											"            if (token) {\r",
+											"                pm.collectionVariables.set(\"token\", token);\r",
+											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente); // Crear evento directamente si ya hay token\r",
+											"}\r",
+											""
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -3744,7 +4045,189 @@
 											"    pm.expect(jsonData).to.have.property(\"id\");\r",
 											"    pm.expect(jsonData.name).to.equal(\"Concierto de Jazz\");\r",
 											"    pm.expect(jsonData.bannerPhotoUrl).to.equal(\"https://example.com/new-banner.jpg\");\r",
-											"    pm.expect(jsonData.isPublic).to.be.false;\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Concierto de Jazz\",\r\n    \"bannerPhotoUrl\": \"https://example.com/new-banner.jpg\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/event/update/{{eventId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"event",
+										"update",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "UPDATE EXISTING EVENT NOT MINE",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Función para hacer login con otro usuario\r",
+											"function loginConSamubar() {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: \"samubar@gmail.com\",\r",
+											"                password: password // Usamos la misma contraseña, puedes cambiarla si es distinta\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al hacer login con samubar:\", err);\r",
+											"        } else {\r",
+											"            const nuevoToken = res.json().token;\r",
+											"            if (nuevoToken) {\r",
+											"                pm.collectionVariables.set(\"token\", nuevoToken);\r",
+											"                console.log(\"Nuevo token guardado para samubar@gmail.com:\", nuevoToken);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta de samubar.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const eventId = res.json().id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"                loginConSamubar(); // Hacer login con el otro usuario después de crear el evento\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: email,\r",
+											"                password: password\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
+											"        } else {\r",
+											"            const token = res.json().token;\r",
+											"            if (token) {\r",
+											"                pm.collectionVariables.set(\"token\", token);\r",
+											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente);\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"El status debe ser 403 Forbidden\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"El body debe contener un mensaje de error\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property(\"message\", \"You can only update your own events\");\r",
+											"    pm.expect(jsonData).to.have.property(\"error\", \"Forbidden\");\r",
+											"    pm.expect(jsonData).to.have.property(\"statusCode\", 403);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"El tipo de respuesta debe ser JSON\", function () {\r",
+											"    pm.response.to.have.header(\"Content-Type\");\r",
+											"    pm.response.to.be.withBody;\r",
+											"    pm.response.to.be.json;\r",
 											"});\r",
 											""
 										],
@@ -3788,6 +4271,154 @@
 										"event",
 										"update",
 										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "UPDATE UNEXISTING EVENT",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const eventId = res.json().id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: email,\r",
+											"                password: password\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
+											"        } else {\r",
+											"            const token = res.json().token;\r",
+											"            if (token) {\r",
+											"                pm.collectionVariables.set(\"token\", token);\r",
+											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente); // Crear evento directamente si ya hay token\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"El código de estado debe ser 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"El cuerpo debe indicar que el evento no fue encontrado\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property(\"message\");\r",
+											"    pm.expect(jsonData.message).to.include(\"Event with ID\");\r",
+											"    pm.expect(jsonData.message).to.include(\"not found\");\r",
+											"    pm.expect(jsonData).to.have.property(\"error\", \"Not Found\");\r",
+											"    pm.expect(jsonData).to.have.property(\"statusCode\", 404);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Concierto de Jazz\",\r\n    \"bannerPhotoUrl\": \"https://example.com/new-banner.jpg\",\r\n    \"isPublic\": false\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/event/update/{{$randomUUID}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"event",
+										"update",
+										"{{$randomUUID}}"
 									]
 								}
 							},
@@ -3901,6 +4532,67 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "UPDATE EXISTING EVENT NO AUTH",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Debe retornar 403 Forbidden con formato de mensaje válido\", function () {\r",
+											"    pm.response.to.have.status(401);\r",
+											"    pm.response.to.have.jsonBody();\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Updated Event Name\",\r\n    \"bannerPhotoUrl\": \"https://example.com/updated-banner.jpg\",\r\n    \"isPublic\": false\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/event/update/{{eventId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"event",
+										"update",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -3908,75 +4600,84 @@
 					"name": "DELETE",
 					"item": [
 						{
-							"name": "DELETE EXISTING EVENT",
+							"name": "DELETE EXISTING EVENT MINE",
 							"event": [
 								{
 									"listen": "prerequest",
 									"script": {
 										"exec": [
+											"// Variables de colección\r",
 											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
-											"\r",
 											"const authUrl = `${baseUrl}/api/auth/login`;\r",
-											"const eventUrl = `${baseUrl}/api/event/create`;\r",
 											"\r",
-											"// Hacer la solicitud de autenticación\r",
-											"\r",
-											"pm.collectionVariables.set(\"eventId\",\"3d9ac5c6-6b6e-4fcb-a36f-e5a45fe22225\");\r",
-											"pm.sendRequest({\r",
-											"    url: authUrl,\r",
-											"    method: \"POST\",\r",
-											"    header: {\r",
-											"        \"Content-Type\": \"application/json\"\r",
-											"    },\r",
-											"    body: {\r",
-											"        mode: \"raw\",\r",
-											"        raw: JSON.stringify({\r",
-											"            email: email,\r",
-											"            password: password\r",
-											"        })\r",
-											"    }\r",
-											"}, function (err, res) {\r",
-											"    if (err) {\r",
-											"        console.log(\"Error en la solicitud de autenticación:\", err);\r",
-											"    } else {\r",
-											"        const token = res.json().token;\r",
-											"        if (token) {\r",
-											"            pm.collectionVariables.set(\"token\", token);\r",
-											"            console.log(\"Token guardado:\", token);\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
 											"        }\r",
-											"\r",
-											"        // Hacer la solicitud para crear el evento\r",
-											"        pm.sendRequest({\r",
-											"            url: eventUrl,\r",
-											"            method: \"POST\",\r",
-											"            header: {\r",
-											"                \"Content-Type\": \"application/json\",\r",
-											"                \"Authorization\": `Bearer ${token}`\r",
-											"            },\r",
-											"            body: {\r",
-											"                mode: \"raw\",\r",
-											"                raw: JSON.stringify({\r",
-											"                    name: \"Concierto de Rock\",\r",
-											"                    bannerPhotoUrl: \"https://example.com/banner.jpg\",\r",
-											"                    isPublic: true,\r",
-											"                    userId: \"b663bf37-2a4f-4490-85ef-48e7b892cd34\"\r",
-											"                })\r",
-											"            }\r",
-											"        }, function (eventErr, eventRes) {\r",
-											"            if (eventErr) {\r",
-											"                console.log(\"Error al crear el evento:\", eventErr);\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const eventId = res.json().id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
 											"            } else {\r",
-											"                const eventId = eventRes.json()._id;\r",
-											"                if (eventId) {\r",
-											"                    pm.collectionVariables.set(\"eventId\", eventId);\r",
-											"                    console.log(\"Evento creado con ID:\", eventId);\r",
-											"                }\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
 											"            }\r",
-											"        });\r",
-											"    }\r",
-											"});\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: email,\r",
+											"                password: password\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
+											"        } else {\r",
+											"            const token = res.json().token;\r",
+											"            if (token) {\r",
+											"                pm.collectionVariables.set(\"token\", token);\r",
+											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente); // Crear evento directamente si ya hay token\r",
+											"}\r",
 											""
 										],
 										"type": "text/javascript",
@@ -4025,6 +4726,340 @@
 										"event",
 										"delete",
 										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DELETE EXISTING EVENT NOT MINE",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Función para hacer login con otro usuario\r",
+											"function loginConSamubar() {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: \"samubar@gmail.com\",\r",
+											"                password: password // Usamos la misma contraseña, puedes cambiarla si es distinta\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al hacer login con samubar:\", err);\r",
+											"        } else {\r",
+											"            const nuevoToken = res.json().token;\r",
+											"            if (nuevoToken) {\r",
+											"                pm.collectionVariables.set(\"token\", nuevoToken);\r",
+											"                console.log(\"Nuevo token guardado para samubar@gmail.com:\", nuevoToken);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta de samubar.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const eventId = res.json().id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"                loginConSamubar(); // Hacer login con el otro usuario después de crear el evento\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: email,\r",
+											"                password: password\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
+											"        } else {\r",
+											"            const token = res.json().token;\r",
+											"            if (token) {\r",
+											"                pm.collectionVariables.set(\"token\", token);\r",
+											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente);\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"El status debe ser 403 Forbidden\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"El body debe contener un mensaje de error\", function () {\r",
+											"    const jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData).to.have.property(\"message\", \"You can only delete your own events\");\r",
+											"    pm.expect(jsonData).to.have.property(\"error\", \"Forbidden\");\r",
+											"    pm.expect(jsonData).to.have.property(\"statusCode\", 403);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"El tipo de respuesta debe ser JSON\", function () {\r",
+											"    pm.response.to.have.header(\"Content-Type\");\r",
+											"    pm.response.to.be.withBody;\r",
+											"    pm.response.to.be.json;\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event/delete/{{eventId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"event",
+										"delete",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DELETE EXISTING EVENT NOT FOUND",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Función para hacer login con otro usuario\r",
+											"function loginConSamubar() {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: \"samubar@gmail.com\",\r",
+											"                password: password // Usamos la misma contraseña, puedes cambiarla si es distinta\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al hacer login con samubar:\", err);\r",
+											"        } else {\r",
+											"            const nuevoToken = res.json().token;\r",
+											"            if (nuevoToken) {\r",
+											"                pm.collectionVariables.set(\"token\", nuevoToken);\r",
+											"                console.log(\"Nuevo token guardado para samubar@gmail.com:\", nuevoToken);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta de samubar.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const eventId = res.json().id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"                loginConSamubar(); // Hacer login con el otro usuario después de crear el evento\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: email,\r",
+											"                password: password\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
+											"        } else {\r",
+											"            const token = res.json().token;\r",
+											"            if (token) {\r",
+											"                pm.collectionVariables.set(\"token\", token);\r",
+											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente);\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Debe retornar 404 si el evento no existe\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"\r",
+											"    const body = pm.response.json();\r",
+											"\r",
+											"    pm.expect(body).to.have.property(\"error\", \"Not Found\");\r",
+											"    pm.expect(body).to.have.property(\"statusCode\", 404);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event/delete/{{$randomUUID}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"event",
+										"delete",
+										"{{$randomUUID}}"
 									]
 								}
 							},
@@ -4136,6 +5171,118 @@
 											"type": "string"
 										}
 									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event/delete/{{eventId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"event",
+										"delete",
+										"{{eventId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DELETE EXISTING EVENT NOT AUTH",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"userEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"const eventUrl = `${baseUrl}/api/event/create`;\r",
+											"\r",
+											"// Hacer la solicitud de autenticación\r",
+											"\r",
+											"pm.collectionVariables.set(\"eventId\",\"bd284937-dddc-4c64-b6ab-91d43ce176d9\");\r",
+											"pm.sendRequest({\r",
+											"    url: authUrl,\r",
+											"    method: \"POST\",\r",
+											"    header: {\r",
+											"        \"Content-Type\": \"application/json\"\r",
+											"    },\r",
+											"    body: {\r",
+											"        mode: \"raw\",\r",
+											"        raw: JSON.stringify({\r",
+											"            email: email,\r",
+											"            password: password\r",
+											"        })\r",
+											"    }\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error en la solicitud de autenticación:\", err);\r",
+											"    } else {\r",
+											"        const token = res.json().token;\r",
+											"        if (token) {\r",
+											"            pm.collectionVariables.set(\"token\", token);\r",
+											"            console.log(\"Token guardado:\", token);\r",
+											"        }\r",
+											"\r",
+											"        // Hacer la solicitud para crear el evento\r",
+											"        pm.sendRequest({\r",
+											"            url: eventUrl,\r",
+											"            method: \"POST\",\r",
+											"            header: {\r",
+											"                \"Content-Type\": \"application/json\",\r",
+											"                \"Authorization\": `Bearer ${token}`\r",
+											"            },\r",
+											"            body: {\r",
+											"                mode: \"raw\",\r",
+											"                raw: JSON.stringify({\r",
+											"                    name: \"Concierto de Rock\",\r",
+											"                    bannerPhotoUrl: \"https://example.com/banner.jpg\",\r",
+											"                    isPublic: true,\r",
+											"                    userId: \"b663bf37-2a4f-4490-85ef-48e7b892cd34\"\r",
+											"                })\r",
+											"            }\r",
+											"        }, function (eventErr, eventRes) {\r",
+											"            if (eventErr) {\r",
+											"                console.log(\"Error al crear el evento:\", eventErr);\r",
+											"            } else {\r",
+											"                const eventId = eventRes.json()._id;\r",
+											"                if (eventId) {\r",
+											"                    pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                    console.log(\"Evento creado con ID:\", eventId);\r",
+											"                }\r",
+											"            }\r",
+											"        });\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Debe retornar 403 Forbidden con mensaje de rol inválido\", function () {\r",
+											"    pm.response.to.have.status(401);\r",
+											"    pm.response.to.have.jsonBody();\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
 								},
 								"method": "DELETE",
 								"header": [],
@@ -6890,54 +8037,6 @@
 				"type": "text/javascript",
 				"packages": {},
 				"exec": [
-					"\r",
-					"pm.collectionVariables.set(\"randomEmail\", \"variable_value\");\r",
-					"\r",
-					"const users = [\r",
-					"    {\r",
-					"        role: 'eventManager',\r",
-					"        email: 'isabella.ocampo@u.icesi.edu.co',\r",
-					"        password: '{{password}}'\r",
-					"    },\r",
-					"    {\r",
-					"        role: 'user',\r",
-					"        email: 'user@example.com',\r",
-					"        password: '{{password}}'\r",
-					"    },\r",
-					"    {\r",
-					"        role: 'admin',\r",
-					"        email: 'alejitocordoba@hotmail.com',\r",
-					"        password: '{{password}}'\r",
-					"    }\r",
-					"];\r",
-					"\r",
-					"const tokenRequests = users.map(user => {\r",
-					"    return pm.sendRequest({\r",
-					"        url: pm.environment.get('baseUrl') + '/auth/login',\r",
-					"        method: 'POST',\r",
-					"        header: { 'Content-Type': 'application/json' },\r",
-					"        body: {\r",
-					"            mode: 'raw',\r",
-					"            raw: JSON.stringify({\r",
-					"                email: user.email,\r",
-					"                password: user.password\r",
-					"            })\r",
-					"        }\r",
-					"    }, function (err, res) {\r",
-					"        if (err) {\r",
-					"            console.error(`❌ Error logging in as ${user.role}:`, err);\r",
-					"            return;\r",
-					"        }\r",
-					"\r",
-					"        if (res.code === 200) {\r",
-					"            const token = res.json().accessToken;\r",
-					"            pm.environment.set(`${user.role}Token`, token);\r",
-					"            console.log(`✅ Token saved for ${user.role}`);\r",
-					"        } else {\r",
-					"            console.warn(`⚠️ Login failed for ${user.role}: ${res.code}`);\r",
-					"        }\r",
-					"    });\r",
-					"});\r",
 					""
 				]
 			}

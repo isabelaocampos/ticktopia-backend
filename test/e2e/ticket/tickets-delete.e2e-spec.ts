@@ -19,18 +19,37 @@ describe('Tickets - Delete (e2e)', () => {
 
     const res = await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: 'ticket4@mail.com', password: 'Abc12345', name: 'User', lastname: 'Test' });
+      .send({ email: 'admindelete@test.com', password: 'Hola1597!!!', name: 'Delete', lastname: 'Admin' });
+
     token = res.body.token;
+
+    await request(app.getHttpServer())
+      .put(`/api/auth/users/roles/${res.body.user.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ roles: ['admin'] });
 
     const event = await request(app.getHttpServer())
       .post('/api/event/createEvent')
       .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Event3', bannerPhotoUrl: 'url', isPublic: true });
+      .send({ name: 'EventDel', bannerPhotoUrl: 'url', isPublic: true });
 
     const presentation = await request(app.getHttpServer())
       .post('/api/presentation')
       .set('Authorization', `Bearer ${token}`)
-      .send({ place: 'Theatre', eventId: event.body.id, latitude: 0, longitude: 0, description: 'desc', openDate: new Date(), startDate: new Date(), ticketAvailabilityDate: new Date(), ticketSaleAvailabilityDate: new Date(), city: 'City', capacity: 100, price: 100 });
+      .send({
+        place: 'Theatre',
+        eventId: event.body.id,
+        latitude: 0,
+        longitude: 0,
+        description: 'desc',
+        openDate: new Date(),
+        startDate: new Date(),
+        ticketAvailabilityDate: new Date(),
+        ticketSaleAvailabilityDate: new Date(),
+        city: 'City',
+        capacity: 100,
+        price: 100,
+      });
 
     const buy = await request(app.getHttpServer())
       .post('/api/tickets/buy')
@@ -48,5 +67,4 @@ describe('Tickets - Delete (e2e)', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('id');
   });
-
 });

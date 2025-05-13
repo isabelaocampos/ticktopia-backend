@@ -42,11 +42,11 @@ describe('EventController', () => {
         },
       ],
     })
-    .overrideGuard(AuthGuard('jwt')) // Sobreescribir el AuthGuard
-    .useValue({ canActivate: jest.fn().mockReturnValue(true) })
-    .overrideGuard(UserRoleGuard) // Sobreescribir el UserRoleGuard
-    .useValue({ canActivate: jest.fn().mockReturnValue(true) })
-    .compile();
+      .overrideGuard(AuthGuard('jwt')) // Sobreescribir el AuthGuard
+      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
+      .overrideGuard(UserRoleGuard) // Sobreescribir el UserRoleGuard
+      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
+      .compile();
 
     controller = module.get<EventController>(EventController);
   });
@@ -101,7 +101,6 @@ describe('EventController', () => {
       name: 'My Awesome Event',
       bannerPhotoUrl: 'https://example.com/banner.jpg',
       isPublic: true,
-      userId: mockUser.id,
     };
 
     const result = await controller.create(createEventDto, mockUser as User);
@@ -110,6 +109,8 @@ describe('EventController', () => {
     expect(result).toEqual({
       ...createEventDto,
       id: 'new-event-id', // El evento debería tener un id generado
+      userId: mockUser.id,
+
     });
     expect(mockEventService.create).toHaveBeenCalledWith({
       ...createEventDto,
@@ -118,71 +119,72 @@ describe('EventController', () => {
   });
 
   it('should fail when the event data is invalid', () => {
-  const createEventDto: CreateEventDto = {
-    name: '',  // Nombre vacío, lo que debería invalidar el DTO
-    bannerPhotoUrl: '',
-    isPublic: true,
-    userId: mockUser.id,
-  };
+    const createEventDto: CreateEventDto = {
+      name: '',  // Nombre vacío, lo que debería invalidar el DTO
+      bannerPhotoUrl: '',
+      isPublic: true,
+    };
 
-  // Simular que el servicio lanza una excepción para datos inválidos
-  mockEventService.create.mockImplementationOnce(() => {
-    throw new Error('Event name cannot be empty');
-  });
+    // Simular que el servicio lanza una excepción para datos inválidos
+    mockEventService.create.mockImplementationOnce(() => {
+      throw new Error('Event name cannot be empty');
+    });
 
-  // Usar toThrow() en lugar de rejects.toThrow() porque el método no es async
-  expect(() => controller.create(createEventDto, mockUser as User)).toThrow();
+    // Usar toThrow() en lugar de rejects.toThrow() porque el método no es async
+    expect(() => controller.create(createEventDto, mockUser as User)).toThrow();
   });
 
   it('should create an event', async () => {
-  const createEventDto: CreateEventDto = {
-    name: 'My Awesome Event',
-    bannerPhotoUrl: 'https://example.com/banner.jpg',
-    isPublic: true,
-    userId: mockUser.id, // El userId es el del usuario autenticado
-  };
+    const createEventDto: CreateEventDto = {
+      name: 'My Awesome Event',
+      bannerPhotoUrl: 'https://example.com/banner.jpg',
+      isPublic: true,
+    };
 
-  const result = await controller.create(createEventDto, mockUser as User);
-  expect(result).toEqual({
-    ...createEventDto,
-    id: 'new-event-id',
+    const result = await controller.create(createEventDto, mockUser as User);
+    expect(result).toEqual({
+      ...createEventDto,
+      id: 'new-event-id',
+      userId: mockUser.id,
+
+
+    });
+    expect(mockEventService.create).toHaveBeenCalledWith({
+      ...createEventDto,
+      userId: mockUser.id,
+    });
   });
-  expect(mockEventService.create).toHaveBeenCalledWith({
-    ...createEventDto,
-    userId: mockUser.id,
+
+  it('should return a list of events with pagination', async () => {
+    const result = await controller.findAll('10', '0'); // Paginación con límite y desplazamiento
+    expect(result).toEqual(['evento1', 'evento2']);
+    expect(mockEventService.findAll).toHaveBeenCalledWith(10, 0);
   });
-});
 
-it('should return a list of events with pagination', async () => {
-  const result = await controller.findAll('10', '0'); // Paginación con límite y desplazamiento
-  expect(result).toEqual(['evento1', 'evento2']);
-  expect(mockEventService.findAll).toHaveBeenCalledWith(10, 0);
-});
+  it('should return events for a specific user', async () => {
+    const result = await controller.findAllByUserId('user-id-123');
+    expect(result).toEqual(['evento1']);
+    expect(mockEventService.findAllByUserId).toHaveBeenCalledWith('user-id-123');
+  });
 
-it('should return events for a specific user', async () => {
-  const result = await controller.findAllByUserId('user-id-123');
-  expect(result).toEqual(['evento1']);
-  expect(mockEventService.findAllByUserId).toHaveBeenCalledWith('user-id-123');
-});
+  it('should return a single event by search term', async () => {
+    const result = await controller.findOne('event-term', mockUser);
+    expect(result).toEqual('evento1');
+    expect(mockEventService.findOne).toHaveBeenCalledWith('event-term', mockUser);
+  });
 
-it('should return a single event by search term', async () => {
-  const result = await controller.findOne('event-term', mockUser);
-  expect(result).toEqual('evento1');
-  expect(mockEventService.findOne).toHaveBeenCalledWith('event-term', mockUser);
-});
+  it('should delete an event', async () => {
+    const result = await controller.remove('event-id-123', mockUser);
+    expect(result).toEqual('Deleted Event');
+    expect(mockEventService.remove).toHaveBeenCalledWith('event-id-123', mockUser);
+  });
 
-it('should delete an event', async () => {
-  const result = await controller.remove('event-id-123', mockUser);
-  expect(result).toEqual('Deleted Event');
-  expect(mockEventService.remove).toHaveBeenCalledWith('event-id-123', mockUser);
-});
-
-it('should update an event', async () => {
-  const updateEventDto: UpdateEventDto = { name: 'Updated Event' };
-  const result = await controller.update('event-id-123', updateEventDto, mockUser);
-  expect(result).toEqual('Updated Event');
-  expect(mockEventService.update).toHaveBeenCalledWith('event-id-123', updateEventDto, mockUser);
-});
+  it('should update an event', async () => {
+    const updateEventDto: UpdateEventDto = { name: 'Updated Event' };
+    const result = await controller.update('event-id-123', updateEventDto, mockUser);
+    expect(result).toEqual('Updated Event');
+    expect(mockEventService.update).toHaveBeenCalledWith('event-id-123', updateEventDto, mockUser);
+  });
 
 
 });

@@ -51,14 +51,12 @@ describe('EventService', () => {
 
   describe('create', () => {
     it('should create an event if user is authorized', async () => {
-      const dto: CreateEventDto = { userId: '123', name: 'Event 1' } as any;
+      const dto: CreateEventDto = {  name: 'Event 1', bannerPhotoUrl: "url", isPublic: true};
       const user = { id: '123', roles: [ValidRoles.eventManager] } as User;
       const event = { 
         ...dto, 
         user,
         id: 'event-123',
-        totalTickets: 100,
-        availableTickets: 100,
         tickets: [],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -73,7 +71,7 @@ describe('EventService', () => {
       mockEventRepo.create.mockReturnValue(dto);
       mockEventRepo.save.mockResolvedValue(event);
 
-      await service.create(dto);
+      await service.create({...dto, userId: user.id});
 
       expect(mockEventRepo.save).toHaveBeenCalledWith({ ...dto, user });
     });
