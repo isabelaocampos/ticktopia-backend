@@ -127,7 +127,6 @@ describe('TicketService', () => {
   });
 
   
-
   it('should throw if user or presentation not found', async () => {
     jest.spyOn(userRepo, 'findOne').mockResolvedValue(null);
     jest.spyOn(presentationRepo, 'findOne').mockResolvedValue(null);
