@@ -7,7 +7,6 @@ describe('UpdateEventDto', () => {
     dto.name = 'Updated Event';
     dto.bannerPhotoUrl = 'https://example.com/updated.jpg';
     dto.isPublic = false;
-    dto.userId = 'cd533345-f1f3-48c9-a62e-7dc2da50c8f8';
 
     const errors = await validate(dto);
     expect(errors.length).toBe(0);
@@ -39,12 +38,4 @@ describe('UpdateEventDto', () => {
     expect(isPublicError).toBeDefined();
   });
 
-  it('should fail if userId is not a valid UUID', async () => {
-    const dto = new UpdateEventDto();
-    dto.userId = 'not-a-uuid';
-
-    const errors = await validate(dto);
-    const userIdError = errors.find(err => err.property === 'userId');
-    expect(userIdError).toBeDefined();
-  });
 });

@@ -28,14 +28,14 @@ export class EventController {
   @Post('create')
   @ApiResponse({ status: 201, description: 'Event was created' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  @Auth(ValidRoles.admin, ValidRoles.eventManager)
+  @Auth(ValidRoles.eventManager)
   create(@Body() createEventDto: CreateEventDto, @GetUser() user: User) {
     // Asegura que el userId sea el del usuario autenticado
     return this.EventService.create({ ...createEventDto, userId: user.id });
   }
 
   @Get('findAll')
-  @Auth(ValidRoles.admin, ValidRoles.eventManager)
+  @Auth(ValidRoles.admin, ValidRoles.eventManager, ValidRoles.client)
   @ApiResponse({ status: 200, description: 'All events returned' })
   findAll(@Query('limit') limit: string, @Query('offset') offset: string) {
     const parsedLimit = parseInt(limit, 10) || 10;
@@ -56,7 +56,7 @@ export class EventController {
   }
 
   @Put('update/:id')
-  @Auth(ValidRoles.admin, ValidRoles.eventManager)
+  @Auth(ValidRoles.eventManager)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateEventDto: UpdateEventDto,

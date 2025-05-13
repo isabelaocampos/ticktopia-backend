@@ -27,11 +27,4 @@ export class CreateEventDto {
     @IsNotEmpty()
     isPublic: boolean;
 
-    @ApiProperty({
-        description: 'User creating the event',
-        example: { id: 'cd533345-f1f3-48c9-a62e-7dc2da50c8f8' },
-    })
-    @IsUUID()
-    @IsNotEmpty()
-    userId: string;
 }
