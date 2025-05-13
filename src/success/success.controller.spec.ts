@@ -24,9 +24,9 @@ describe('SuccessController', () => {
     });
 
     it('should return status', async () => {
-        const result = controller.showSucces()
+        const result = controller.showSuccess()
         expect(result).toEqual(
-           "PAGO EXISTOSO"
+           "PAGO EXITOSO"
         );
     });
 
