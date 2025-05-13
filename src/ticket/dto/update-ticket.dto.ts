@@ -9,12 +9,4 @@ export class UpdateTicketDto {
   @IsOptional()
   @IsBoolean()
   isRedeemed?: boolean;
-
-  @ApiPropertyOptional({
-    example: false,
-    description: 'Activate or deactivate the ticket (cancelled or not)',
-  })
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
 }

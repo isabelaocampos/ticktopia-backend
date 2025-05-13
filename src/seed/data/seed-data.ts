@@ -167,6 +167,13 @@ export const initialData: SeedData = {
             roles: [ValidRoles.eventManager]
         },
         {
+            name: "Checker",
+            email: "ticketchecker@gmail.com",
+            password: "Hola1597!!!",
+            lastname: "Ticket",
+            roles: [ValidRoles.ticketChecker]
+        },
+        {
             name: "Alejandro",
             email: "alejitocordoba@hotmail.com",
             password: "Hola1597!!!",
