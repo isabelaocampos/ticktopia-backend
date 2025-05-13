@@ -44,4 +44,6 @@ jobs:
           docker pull elkofix/ticktopia:latest
           docker stop ticktopia-backend
           docker rm ticktopia-backend
+          docker image prune -f
+          docker rmi elkofix/ticktopia:latest || true
           docker run -d -p 1337:3000 --name ticktopia-backend elkofix/ticktopia:latest
