@@ -48,7 +48,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"email\": \"{{superadminEmail}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+									"raw": "{\r\n    \"email\": \"{{ticketEmail}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -5309,577 +5309,8 @@
 			"name": "Tickets",
 			"item": [
 				{
-					"name": "POST",
-					"item": [
-						{
-							"name": "CREATE TICKET WITHOUT TOKEN",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Asegurarse de que el token NO está en los headers\r",
-											"pm.request.headers.clear();\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Test for status code\r",
-											"pm.test(\"Status code is 403\", function () {\r",
-											"    pm.response.to.have.status(403);\r",
-											"});\r",
-											"\r",
-											"\r",
-											"// Test for response body properties\r",
-											"pm.test(\"Response body has expected properties\", function () {\r",
-											"    const responseBody = pm.response.json();\r",
-											"    pm.expect(responseBody).to.have.property('message');\r",
-											"    pm.expect(responseBody).to.have.property('error');\r",
-											"    pm.expect(responseBody).to.have.property('statusCode');\r",
-											"});\r",
-											"\r",
-											"\r",
-											"\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{userTicketToken\n}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"userId\":\"c6446b32-60a7-4556-b73b-e0d716bec94c\",\r\n    \"presentationId\": \"81b2f8e2-adae-4125-a49b-0bfa6cc819d8\"\r\n}\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{base_url}}/api/tickets/admin",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"api",
-										"tickets",
-										"admin"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "CREATE TICKET",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
-											"const password = pm.collectionVariables.get(\"password\");\r",
-											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
-											"\r",
-											"pm.sendRequest({\r",
-											"    url: authUrl,\r",
-											"    method: \"POST\",\r",
-											"    header: {\r",
-											"        \"Content-Type\": \"application/json\"\r",
-											"    },\r",
-											"    body: {\r",
-											"        mode: \"raw\",\r",
-											"        raw: JSON.stringify({\r",
-											"            email: email,\r",
-											"            password: password\r",
-											"        })\r",
-											"    }\r",
-											"}, function (err, res) {\r",
-											"    if (err) {\r",
-											"        console.log(\"Error en la solicitud:\", err);\r",
-											"    } else {\r",
-											"        const token = res.json().token;\r",
-											"        \r",
-											"        if (token) {\r",
-											"            pm.collectionVariables.set(\"token\", token);\r",
-											"            console.log(\"Token guardado:\", token);\r",
-											"        } else {\r",
-											"            console.log(\"No se encontró un token en la respuesta.\");\r",
-											"        }\r",
-											"    }\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Test for status code\r",
-											"pm.test(\"Status code is 201\", function () {\r",
-											"    pm.response.to.have.status(201);\r",
-											"});\r",
-											"\r",
-											"// Test for response time\r",
-											"pm.test(\"Response time is less than 2000ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
-											"});\r",
-											"\r",
-											"// Test for response body properties\r",
-											"pm.test(\"Response body has required properties\", function () {\r",
-											"    const responseBody = pm.response.json();\r",
-											"    pm.expect(responseBody.id).to.exist;\r",
-											"    pm.expect(responseBody.buyDate).to.exist;\r",
-											"    pm.expect(responseBody.isRedeemed).to.exist;\r",
-											"    pm.expect(responseBody.isActive).to.exist;\r",
-											"    pm.expect(responseBody.quantity).to.exist;\r",
-											"    pm.expect(responseBody.user).to.exist;\r",
-											"    pm.expect(responseBody.presentation).to.exist;\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"userId\":\"c6446b32-60a7-4556-b73b-e0d716bec94c\",\r\n    \"presentationId\": \"81b2f8e2-adae-4125-a49b-0bfa6cc819d8\"\r\n}\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{base_url}}/api/tickets/admin",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"api",
-										"tickets",
-										"admin"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "CREATE TICKET TO DELETE",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
-											"const password = pm.collectionVariables.get(\"password\");\r",
-											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
-											"\r",
-											"pm.sendRequest({\r",
-											"    url: authUrl,\r",
-											"    method: \"POST\",\r",
-											"    header: {\r",
-											"        \"Content-Type\": \"application/json\"\r",
-											"    },\r",
-											"    body: {\r",
-											"        mode: \"raw\",\r",
-											"        raw: JSON.stringify({\r",
-											"            email: email,\r",
-											"            password: password\r",
-											"        })\r",
-											"    }\r",
-											"}, function (err, res) {\r",
-											"    if (err) {\r",
-											"        console.log(\"Error en la solicitud:\", err);\r",
-											"    } else {\r",
-											"        const token = res.json().token;\r",
-											"        \r",
-											"        if (token) {\r",
-											"            pm.collectionVariables.set(\"token\", token);\r",
-											"            console.log(\"Token guardado:\", token);\r",
-											"        } else {\r",
-											"            console.log(\"No se encontró un token en la respuesta.\");\r",
-											"        }\r",
-											"    }\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Test for status code\r",
-											"pm.test(\"Status code is 201\", function () {\r",
-											"    pm.response.to.have.status(201);\r",
-											"});\r",
-											"\r",
-											"// Test for response time\r",
-											"pm.test(\"Response time is less than 2000ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
-											"});\r",
-											"\r",
-											"// Test for response body properties\r",
-											"pm.test(\"Response body has required properties\", function () {\r",
-											"    const responseBody = pm.response.json();\r",
-											"    pm.expect(responseBody.id).to.exist;\r",
-											"    pm.expect(responseBody.buyDate).to.exist;\r",
-											"    pm.expect(responseBody.isRedeemed).to.exist;\r",
-											"    pm.expect(responseBody.isActive).to.exist;\r",
-											"    pm.expect(responseBody.quantity).to.exist;\r",
-											"    pm.expect(responseBody.user).to.exist;\r",
-											"    pm.expect(responseBody.presentation).to.exist;\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"userId\":\"c6446b32-60a7-4556-b73b-e0d716bec94c\",\r\n    \"presentationId\": \"2fa60388-0c2d-48b6-af1f-0ee74df6d305\"\r\n}\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{base_url}}/api/tickets/admin",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"api",
-										"tickets",
-										"admin"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "BUY A TICKET",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Test for status code\r",
-											"pm.test(\"Status code is 201\", function () {\r",
-											"    pm.response.to.have.status(201);\r",
-											"});\r",
-											"\r",
-											"// Test for response time\r",
-											"pm.test(\"Response time is less than 2000ms\", function () {\r",
-											"    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
-											"});\r",
-											"\r",
-											"// Test for verifying the response body properties\r",
-											"pm.test(\"Verify the response body properties\", function () {\r",
-											"    const jsonData = pm.response.json();\r",
-											"    pm.expect(jsonData.id).to.exist;\r",
-											"    pm.expect(jsonData.buyDate).to.exist;\r",
-											"    pm.expect(jsonData.isRedeemed).to.exist;\r",
-											"    pm.expect(jsonData.isActive).to.exist;\r",
-											"    pm.expect(jsonData.quantity).to.exist;\r",
-											"    pm.expect(jsonData.user).to.exist;\r",
-											"    pm.expect(jsonData.presentation).to.exist;\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{userTicketToken\n}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"presentationId\":\"2fa60388-0c2d-48b6-af1f-0ee74df6d305\",\r\n    \"quantity\": 2\r\n}\r\n        \r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{base_url}}/api/tickets/buy",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"api",
-										"tickets",
-										"buy"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
 					"name": "GET",
 					"item": [
-						{
-							"name": "FIND TICKET BY ID WITHOUT AUTH",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Test for status code\r",
-											"pm.test(\"Status code is 403\", function () {\r",
-											"    pm.response.to.have.status(403);\r",
-											"});\r",
-											"\r",
-											"// Test for response body properties\r",
-											"pm.test(\"Response body has required properties\", function () {\r",
-											"    const responseBody = pm.response.json();\r",
-											"    pm.expect(responseBody).to.have.property(\"message\");\r",
-											"    pm.expect(responseBody).to.have.property(\"error\");\r",
-											"    pm.expect(responseBody).to.have.property(\"statusCode\");\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{eventManagerToken\n}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/tickets/{{ticketId}}",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"api",
-										"tickets",
-										"{{ticketId}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "FIND TICKET BY ID",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Autenticación\r",
-											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
-											"const password = pm.collectionVariables.get(\"password\");\r",
-											"\r",
-											"const authUrl = `${baseUrl}/auth/login`;\r",
-											"\r",
-											"// Solo realizar la autenticación si no hay token o si ha expirado\r",
-											"if (!pm.collectionVariables.get(\"token\")) {\r",
-											"    pm.sendRequest({\r",
-											"        url: authUrl,\r",
-											"        method: \"POST\",\r",
-											"        header: {\r",
-											"            \"Content-Type\": \"application/json\"\r",
-											"        },\r",
-											"        body: {\r",
-											"            mode: \"raw\",\r",
-											"            raw: JSON.stringify({\r",
-											"                email: email,\r",
-											"                password: password\r",
-											"            })\r",
-											"        }\r",
-											"    }, function (err, res) {\r",
-											"        if (err) {\r",
-											"            console.log(\"Error en la solicitud:\", err);\r",
-											"        } else {\r",
-											"            const token = res.json().token;\r",
-											"            \r",
-											"            if (token) {\r",
-											"                pm.collectionVariables.set(\"token\", token);\r",
-											"                console.log(\"Token guardado:\", token);\r",
-											"            } else {\r",
-											"                console.log(\"No se encontró un token en la respuesta.\");\r",
-											"            }\r",
-											"        }\r",
-											"    });\r",
-											"}\r",
-											"\r",
-											"// Guardar el ID del evento que estás buscando para uso en tests\r",
-											"pm.collectionVariables.set(\"eventId\", pm.collectionVariables.get(\"eventId\") || \"67e9a5ca924d886968e4707a\");\r",
-											"\r",
-											"console.log(\"Buscando evento con ID:\", pm.collectionVariables.get(\"eventId\"));"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Test for the status code\r",
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(200);\r",
-											"});\r",
-											"\r",
-											"\r",
-											"\r",
-											"// Test for the response body properties\r",
-											"pm.test(\"Response body has the expected properties\", function () {\r",
-											"    const responseBody = pm.response.json();\r",
-											"    pm.expect(responseBody).to.have.property('id');\r",
-											"    pm.expect(responseBody).to.have.property('buyDate');\r",
-											"    pm.expect(responseBody).to.have.property('isRedeemed');\r",
-											"    pm.expect(responseBody).to.have.property('isActive');\r",
-											"    pm.expect(responseBody).to.have.property('quantity');\r",
-											"    pm.expect(responseBody).to.have.property('user');\r",
-											"    pm.expect(responseBody).to.have.property('presentation');\r",
-											"});\r",
-											"\r",
-											"\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{base_url}}/api/tickets/{{ticketId}}",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"api",
-										"tickets",
-										"{{ticketId}}"
-									]
-								}
-							},
-							"response": []
-						},
 						{
 							"name": "GET ALL TICKET LIST",
 							"event": [
@@ -5888,7 +5319,7 @@
 									"script": {
 										"exec": [
 											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const email = pm.collectionVariables.get(\"userEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
 											"\r",
 											"const authUrl = `${baseUrl}/api/auth/login`;\r",
@@ -5996,6 +5427,112 @@
 							"response": []
 						},
 						{
+							"name": "GET ALL TICKET NO USER",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"pm.sendRequest({\r",
+											"    url: authUrl,\r",
+											"    method: \"POST\",\r",
+											"    header: {\r",
+											"        \"Content-Type\": \"application/json\"\r",
+											"    },\r",
+											"    body: {\r",
+											"        mode: \"raw\",\r",
+											"        raw: JSON.stringify({\r",
+											"            email: email,\r",
+											"            password: password\r",
+											"        })\r",
+											"    }\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error en la solicitud:\", err);\r",
+											"    } else {\r",
+											"        const token = res.json().token;\r",
+											"        \r",
+											"        if (token) {\r",
+											"            pm.collectionVariables.set(\"token\", token);\r",
+											"            console.log(\"Token guardado:\", token);\r",
+											"        } else {\r",
+											"            console.log(\"No se encontró un token en la respuesta.\");\r",
+											"        }\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Test for status code\r",
+											"pm.test(\"Status code is 403\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});\r",
+											"\r",
+											"// Test for response body properties\r",
+											"pm.test(\"Response contains message and statusCode\", function () {\r",
+											"    const responseBody = pm.response.json();\r",
+											"    pm.expect(responseBody).to.have.property(\"message\");\r",
+											"    pm.expect(responseBody).to.have.property(\"statusCode\");\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}\t",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/tickets",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"tickets"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "GET ALL TICKET LIST WITHOUT AUTH",
 							"event": [
 								{
@@ -6072,7 +5609,7 @@
 									"bearer": [
 										{
 											"key": "token",
-											"value": "{{userTicketToken\n}}",
+											"value": "{{userTicketToken}}\t",
 											"type": "string"
 										}
 									]
@@ -6100,133 +5637,40 @@
 								}
 							},
 							"response": []
-						}
-					]
-				},
-				{
-					"name": "DELETE",
-					"item": [
+						},
 						{
-							"name": "CANCEL TICKET WITHOUT AUTH",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"pm.sendRequest({\r",
-											"    url: pm.collectionVariables.get(\"base_url\") + \"/ticket/buy\",\r",
-											"    method: \"POST\",\r",
-											"    header: {\r",
-											"        \"Content-Type\": \"application/json\"\r",
-											"    },\r",
-											"    body: {\r",
-											"        mode: \"raw\",\r",
-											"        raw: JSON.stringify({\r",
-											"            \"Presentation_idPresentation\": 123,\r",
-											"            \"User_idUser\": \"456\",\r",
-											"            \"isRedeemed\": false,\r",
-											"            \"isActive\": true\r",
-											"        })\r",
-											"    }\r",
-											"}, function (err, res) {\r",
-											"    if (err) {\r",
-											"        console.log(\"Error en la solicitud:\", err);\r",
-											"    } else {\r",
-											"        let responseData = res.json();\r",
-											"        if (res.code === 201 && responseData._id) {\r",
-											"            pm.collectionVariables.set(\"cancelTicket\", responseData._id);\r",
-											"            console.log(\"Ticket creado con éxito:\", responseData._id);\r",
-											"        } else {\r",
-											"            console.log(\"Error al crear ticket:\", responseData);\r",
-											"        }\r",
-											"    }\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								},
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 403\", function () {\r",
-											"    pm.response.to.have.status(403);\r",
-											"});\r",
-											"\r",
-											"pm.test(\"Response body has message property\", function () {\r",
-											"    pm.expect(pm.response.json()).to.have.property('message');\r",
-											"});\r",
-											""
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
+							"name": "New Request",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{userTicketToken\n}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "DELETE",
+								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/api/tickets/{{cancelTicket}}}}/delete",
+									"raw": "{{base_url}}/api/seed",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
 										"api",
-										"tickets",
-										"{{cancelTicket}}}}",
-										"delete"
+										"seed"
 									]
 								}
 							},
 							"response": []
-						},
+						}
+					]
+				},
+				{
+					"name": "POST",
+					"item": [
 						{
-							"name": "CANCEL TICKET",
+							"name": "BUY A TICKET",
 							"event": [
 								{
-									"listen": "prerequest",
+									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.sendRequest({\r",
-											"    url: pm.collectionVariables.get(\"base_url\") + \"/ticket/buy\",\r",
-											"    method: \"POST\",\r",
-											"    header: {\r",
-											"        \"Content-Type\": \"application/json\"\r",
-											"    },\r",
-											"    body: {\r",
-											"        mode: \"raw\",\r",
-											"        raw: JSON.stringify({\r",
-											"            \"Presentation_idPresentation\": 123,\r",
-											"            \"User_idUser\": \"456\",\r",
-											"            \"isRedeemed\": false,\r",
-											"            \"isActive\": true\r",
-											"        })\r",
-											"    }\r",
-											"}, function (err, res) {\r",
-											"    if (err) {\r",
-											"        console.log(\"Error en la solicitud:\", err);\r",
-											"    } else {\r",
-											"        let responseData = res.json();\r",
-											"        if (res.code === 201 && responseData._id) {\r",
-											"            pm.collectionVariables.set(\"cancelTicket\", responseData._id);\r",
-											"            console.log(\"Ticket creado con éxito:\", responseData._id);\r",
-											"        } else {\r",
-											"            console.log(\"Error al crear ticket:\", responseData);\r",
-											"        }\r",
-											"    }\r",
+											"// Test for status code\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
 											"});\r",
 											""
 										],
@@ -6235,15 +5679,133 @@
 									}
 								},
 								{
-									"listen": "test",
+									"listen": "prerequest",
 									"script": {
 										"exec": [
-											"// Test for the DELETE request\r",
-											"pm.test(\"Status code is 200\", function () {\r",
-											"    pm.response.to.have.status(200);\r",
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
+											"const userEmail = pm.collectionVariables.get(\"userEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Función para crear la presentación con el eventId\r",
+											"function crearPresentacion(eventId, token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/presentation`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"place\": \"Campin\",\r",
+											"                \"capacity\": 4000,\r",
+											"                \"openDate\": \"2025-05-06T08:00:00Z\",\r",
+											"                \"startDate\": \"2025-05-06T10:00:00Z\",\r",
+											"                \"latitude\": 6.25184,\r",
+											"                \"longitude\": -75.56359,\r",
+											"                \"description\": \"A musical event in the main stadium.\",\r",
+											"                \"ticketAvailabilityDate\": \"2025-04-20T00:00:00Z\",\r",
+											"                \"ticketSaleAvailabilityDate\": \"2025-04-25T00:00:00Z\",\r",
+											"                \"city\": \"Bogota\",\r",
+											"                \"price\": 50000,\r",
+											"                \"eventId\": eventId\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear presentación:\", err);\r",
+											"        } else {\r",
+											"            const presentation = res.json();\r",
+											"            if (presentation && presentation.idPresentation) {\r",
+											"                pm.collectionVariables.set(\"presentationId\", presentation.idPresentation);\r",
+											"                console.log(\"Presentación creada con ID:\", presentation.idPresentation);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID de la presentación en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Función para crear el evento\r",
+											"function crearEvento(token, callback) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const event = res.json();\r",
+											"            const eventId = event.id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"                crearPresentacion(eventId, token);\r",
+											"                if (callback) callback(); // Ejecutar paso siguiente\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Login con credenciales y ejecutar acción con el token obtenido\r",
+											"function loginYContinuar(correo, clave, callback) {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: correo,\r",
+											"                password: clave\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error en autenticación con\", correo, \":\", err);\r",
+											"        } else {\r",
+											"            const token = res.json().token;\r",
+											"            if (token) {\r",
+											"                console.log(\"Token obtenido para\", correo, \":\", token);\r",
+											"                if (callback) callback(token);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta de\", correo);\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Flujo principal\r",
+											"loginYContinuar(email, password, function (tokenEventManager) {\r",
+											"    // Crear evento y presentación con el token de eventmanageEmail\r",
+											"    crearEvento(tokenEventManager, function () {\r",
+											"        // Luego hacer login con el userEmail y guardar ese token\r",
+											"        loginYContinuar(userEmail, password, function (tokenUsuario) {\r",
+											"            pm.collectionVariables.set(\"token\", tokenUsuario);\r",
+											"            console.log(\"Nuevo token guardado (usuario):\", tokenUsuario);\r",
+											"        });\r",
+											"    });\r",
 											"});\r",
-											"\r",
-											"\r",
 											""
 										],
 										"type": "text/javascript",
@@ -6262,11 +5824,11 @@
 										}
 									]
 								},
-								"method": "DELETE",
+								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "",
+									"raw": "{\r\n    \"presentationId\": \"{{presentationId}}\",\r\n    \"quantity\": 2\r\n}\r\n        \r\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -6274,39 +5836,328 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/api/tickets/{{cancelTicket}}/delete",
+									"raw": "{{base_url}}/api/tickets/buy",
 									"host": [
 										"{{base_url}}"
 									],
 									"path": [
 										"api",
 										"tickets",
-										"{{cancelTicket}}",
-										"delete"
+										"buy"
 									]
 								}
 							},
 							"response": []
-						}
-					]
-				},
-				{
-					"name": "PUT",
-					"item": [
+						},
 						{
-							"name": "UPDATE TICKET",
+							"name": "BUY A TICKET NOT PRESENTATION FOUND",
 							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct message and error\", function () {\r",
+											"    const res = pm.response.json();\r",
+											"    \r",
+											"    pm.expect(res).to.have.property(\"message\", \"Presentation not found\");\r",
+											"    pm.expect(res).to.have.property(\"error\", \"Not Found\");\r",
+											"    pm.expect(res).to.have.property(\"statusCode\", 404);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
 								{
 									"listen": "prerequest",
 									"script": {
 										"exec": [
+											"// Variables de colección\r",
 											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
+											"const userEmail = pm.collectionVariables.get(\"userEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
-											"\r",
 											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
-											"if (!pm.collectionVariables.get(\"token\")) {\r",
+											"// Función para crear la presentación con el eventId\r",
+											"function crearPresentacion(eventId, token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/presentation`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"place\": \"Campin\",\r",
+											"                \"capacity\": 4000,\r",
+											"                \"openDate\": \"2025-05-06T08:00:00Z\",\r",
+											"                \"startDate\": \"2025-05-06T10:00:00Z\",\r",
+											"                \"latitude\": 6.25184,\r",
+											"                \"longitude\": -75.56359,\r",
+											"                \"description\": \"A musical event in the main stadium.\",\r",
+											"                \"ticketAvailabilityDate\": \"2025-04-20T00:00:00Z\",\r",
+											"                \"ticketSaleAvailabilityDate\": \"2025-04-25T00:00:00Z\",\r",
+											"                \"city\": \"Bogota\",\r",
+											"                \"price\": 50000,\r",
+											"                \"eventId\": eventId\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear presentación:\", err);\r",
+											"        } else {\r",
+											"            const presentation = res.json();\r",
+											"            if (presentation && presentation.idPresentation) {\r",
+											"                pm.collectionVariables.set(\"presentationId\", presentation.idPresentation);\r",
+											"                console.log(\"Presentación creada con ID:\", presentation.idPresentation);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID de la presentación en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Función para crear el evento\r",
+											"function crearEvento(token, callback) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const event = res.json();\r",
+											"            const eventId = event.id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"                crearPresentacion(eventId, token);\r",
+											"                if (callback) callback(); // Ejecutar paso siguiente\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Login con credenciales y ejecutar acción con el token obtenido\r",
+											"function loginYContinuar(correo, clave, callback) {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: correo,\r",
+											"                password: clave\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error en autenticación con\", correo, \":\", err);\r",
+											"        } else {\r",
+											"            const token = res.json().token;\r",
+											"            if (token) {\r",
+											"                console.log(\"Token obtenido para\", correo, \":\", token);\r",
+											"                if (callback) callback(token);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta de\", correo);\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Flujo principal\r",
+											"loginYContinuar(email, password, function (tokenEventManager) {\r",
+											"    // Crear evento y presentación con el token de eventmanageEmail\r",
+											"    crearEvento(tokenEventManager, function () {\r",
+											"        // Luego hacer login con el userEmail y guardar ese token\r",
+											"        loginYContinuar(userEmail, password, function (tokenUsuario) {\r",
+											"            pm.collectionVariables.set(\"token\", tokenUsuario);\r",
+											"            console.log(\"Nuevo token guardado (usuario):\", tokenUsuario);\r",
+											"        });\r",
+											"    });\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"presentationId\": \"{{$randomUUID}}\",\r\n    \"quantity\": 2\r\n}\r\n        \r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/tickets/buy",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"tickets",
+										"buy"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "BUY A TICKET NOT CLIENT",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"El usuario necesita un rol válido (403 Forbidden)\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"\r",
+											"    const jsonData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(jsonData).to.have.property(\"message\");\r",
+											"    pm.expect(jsonData.message).to.match(/needs a valid role/i);\r",
+											"\r",
+											"    pm.expect(jsonData).to.have.property(\"error\", \"Forbidden\");\r",
+											"    pm.expect(jsonData).to.have.property(\"statusCode\", 403);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Función para crear la presentación con el eventId\r",
+											"function crearPresentacion(eventId, token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/presentation`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"place\": \"Campin\",\r",
+											"                \"capacity\": 4000,\r",
+											"                \"openDate\": \"2025-05-06T08:00:00Z\",\r",
+											"                \"startDate\": \"2025-05-06T10:00:00Z\",\r",
+											"                \"latitude\": 6.25184,\r",
+											"                \"longitude\": -75.56359,\r",
+											"                \"description\": \"A musical event in the main stadium.\",\r",
+											"                \"ticketAvailabilityDate\": \"2025-04-20T00:00:00Z\",\r",
+											"                \"ticketSaleAvailabilityDate\": \"2025-04-25T00:00:00Z\",\r",
+											"                \"city\": \"Bogota\",\r",
+											"                \"price\": 50000,\r",
+											"                \"eventId\": eventId\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear presentación:\", err);\r",
+											"        } else {\r",
+											"            const presentation = res.json();\r",
+											"            if (presentation && presentation.idPresentation) {\r",
+											"                pm.collectionVariables.set(\"presentationId\", presentation.idPresentation);\r",
+											"                console.log(\"Presentación creada con ID:\", presentation.idPresentation);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID de la presentación en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const event = res.json();\r",
+											"            const eventId = event.id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"\r",
+											"                // Crear la presentación usando el eventId\r",
+											"                crearPresentacion(eventId, token);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
 											"    pm.sendRequest({\r",
 											"        url: authUrl,\r",
 											"        method: \"POST\",\r",
@@ -6322,17 +6173,231 @@
 											"        }\r",
 											"    }, function (err, res) {\r",
 											"        if (err) {\r",
-											"            console.log(\"Error en la solicitud:\", err);\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
 											"        } else {\r",
 											"            const token = res.json().token;\r",
 											"            if (token) {\r",
 											"                pm.collectionVariables.set(\"token\", token);\r",
 											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta.\");\r",
 											"            }\r",
 											"        }\r",
 											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente); // Crear evento directamente si ya hay token\r",
 											"}\r",
-											"pm.collectionVariables.set(\"ticketId\",\"8acc6d3c-c84f-427c-82d9-88cd252df208\");"
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"presentationId\": \"{{presentationId}}\",\r\n    \"quantity\": 2\r\n}\r\n        \r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/tickets/buy",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"tickets",
+										"buy"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "BUY A TICKET NO AUTH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Acceso no autorizado (401 Unauthorized)\", function () {\r",
+											"    pm.response.to.have.status(401);\r",
+											"\r",
+											"    const jsonData = pm.response.json();\r",
+											"\r",
+											"    pm.expect(jsonData).to.have.property(\"message\", \"Unauthorized\");\r",
+											"    pm.expect(jsonData).to.have.property(\"statusCode\", 401);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"presentationId\": \"{{presentationId}}\",\r\n    \"quantity\": 2\r\n}\r\n        \r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/tickets/buy",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"tickets",
+										"buy"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "New Request",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"presentationId\": \"{{$randomUUID}}\",\r\n    \"quantity\": 2\r\n}\r\n        \r\n"
+								},
+								"url": {
+									"raw": "https://770d-186-112-9-69.ngrok-free.app/api/webhook/stripe",
+									"protocol": "https",
+									"host": [
+										"770d-186-112-9-69",
+										"ngrok-free",
+										"app"
+									],
+									"path": [
+										"api",
+										"webhook",
+										"stripe"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "PUT",
+					"item": [
+						{
+							"name": "REDEEM TICKET",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const ticketEmail = pm.collectionVariables.get(\"ticketEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Paso 1: Obtener seed y extraer un activeTicketId\r",
+											"pm.sendRequest({\r",
+											"    url: `${baseUrl}/api/seed`,\r",
+											"    method: \"GET\"\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error al obtener /api/seed:\", err);\r",
+											"    } else {\r",
+											"        const seedData = res.json();\r",
+											"        const activeTicketIds = seedData.activeTicketIds;\r",
+											"\r",
+											"        if (activeTicketIds && activeTicketIds.length > 0) {\r",
+											"            const selectedTicketId = activeTicketIds[0];\r",
+											"            pm.collectionVariables.set(\"ticketId\", selectedTicketId);\r",
+											"            console.log(\"ID de presentación seleccionado:\", selectedTicketId);\r",
+											"\r",
+											"            // Paso 2: Login con ticketEmail\r",
+											"            pm.sendRequest({\r",
+											"                url: authUrl,\r",
+											"                method: \"POST\",\r",
+											"                header: {\r",
+											"                    \"Content-Type\": \"application/json\"\r",
+											"                },\r",
+											"                body: {\r",
+											"                    mode: \"raw\",\r",
+											"                    raw: JSON.stringify({\r",
+											"                        email: ticketEmail,\r",
+											"                        password: password\r",
+											"                    })\r",
+											"                }\r",
+											"            }, function (err, res) {\r",
+											"                if (err) {\r",
+											"                    console.log(\"Error al autenticar con ticketEmail:\", err);\r",
+											"                } else {\r",
+											"                    const token = res.json().token;\r",
+											"                    if (token) {\r",
+											"                        pm.collectionVariables.set(\"token\", token);\r",
+											"                        console.log(\"Token guardado correctamente:\", token);\r",
+											"                        // Aquí podrías invocar otra función, si necesitas continuar el flujo\r",
+											"                    } else {\r",
+											"                        console.log(\"No se encontró un token en la respuesta de login.\");\r",
+											"                    }\r",
+											"                }\r",
+											"            });\r",
+											"\r",
+											"        } else {\r",
+											"            console.log(\"No se encontraron activeTicketIds en la respuesta de seed.\");\r",
+											"        }\r",
+											"    }\r",
+											"});\r",
+											""
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -6358,7 +6423,7 @@
 											"    pm.expect(jsonData.id).to.exist;\r",
 											"    pm.expect(jsonData.buyDate).to.exist;\r",
 											"    pm.expect(jsonData.isRedeemed).to.equal(true);\r",
-											"    pm.expect(jsonData.isActive).to.equal(false);\r",
+											"    pm.expect(jsonData.isActive).to.equal(true);\r",
 											"    pm.expect(jsonData.quantity).to.equal(1);\r",
 											"});\r",
 											""
@@ -6383,7 +6448,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"isRedeemed\":true,\r\n    \"isActive\":false\r\n\r\n}",
+									"raw": "{\r\n    \"isRedeemed\":true\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -6405,45 +6470,371 @@
 							"response": []
 						},
 						{
-							"name": "UPDATE TICKET WITHOUT AUTH",
+							"name": "REDEEM TICKET ALREADY REDEMEED",
 							"event": [
 								{
 									"listen": "prerequest",
 									"script": {
 										"exec": [
+											"// Variables de colección\r",
 											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const ticketEmail = pm.collectionVariables.get(\"ticketEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
-											"\r",
 											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
-											"if (!pm.collectionVariables.get(\"token\")) {\r",
-											"    pm.sendRequest({\r",
-											"        url: authUrl,\r",
-											"        method: \"POST\",\r",
-											"        header: {\r",
-											"            \"Content-Type\": \"application/json\"\r",
-											"        },\r",
-											"        body: {\r",
-											"            mode: \"raw\",\r",
-											"            raw: JSON.stringify({\r",
-											"                email: email,\r",
-											"                password: password\r",
-											"            })\r",
-											"        }\r",
-											"    }, function (err, res) {\r",
-											"        if (err) {\r",
-											"            console.log(\"Error en la solicitud:\", err);\r",
+											"// Paso 1: Obtener seed y extraer un activeTicketId\r",
+											"pm.sendRequest({\r",
+											"    url: `${baseUrl}/api/seed`,\r",
+											"    method: \"GET\"\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error al obtener /api/seed:\", err);\r",
+											"    } else {\r",
+											"        const seedData = res.json();\r",
+											"        const activeTicketIds = seedData.activeTicketIds;\r",
+											"\r",
+											"        if (activeTicketIds && activeTicketIds.length > 0) {\r",
+											"            const selectedTicketId = activeTicketIds[0];\r",
+											"            pm.collectionVariables.set(\"ticketId\", selectedTicketId);\r",
+											"            console.log(\"ID de presentación seleccionado:\", selectedTicketId);\r",
+											"\r",
+											"            // Paso 2: Login con ticketEmail\r",
+											"            pm.sendRequest({\r",
+											"                url: authUrl,\r",
+											"                method: \"POST\",\r",
+											"                header: {\r",
+											"                    \"Content-Type\": \"application/json\"\r",
+											"                },\r",
+											"                body: {\r",
+											"                    mode: \"raw\",\r",
+											"                    raw: JSON.stringify({\r",
+											"                        email: ticketEmail,\r",
+											"                        password: password\r",
+											"                    })\r",
+											"                }\r",
+											"            }, function (err, res) {\r",
+											"                if (err) {\r",
+											"                    console.log(\"Error al autenticar con ticketEmail:\", err);\r",
+											"                } else {\r",
+											"                    const token = res.json().token;\r",
+											"                    if (token) {\r",
+											"                        pm.collectionVariables.set(\"token\", token);\r",
+											"                        console.log(\"Token guardado correctamente:\", token);\r",
+											"\r",
+											"                        // Paso 3: Hacer PUT a /api/tickets/{{ticketId}} con isRedeemed: true\r",
+											"                        const ticketId = selectedTicketId;\r",
+											"                        const putUrl = `${baseUrl}/api/tickets/${ticketId}`;\r",
+											"                        pm.sendRequest({\r",
+											"                            url: putUrl,\r",
+											"                            method: \"PUT\",\r",
+											"                            header: {\r",
+											"                                \"Content-Type\": \"application/json\",\r",
+											"                                \"Authorization\": `Bearer ${token}`\r",
+											"                            },\r",
+											"                            body: {\r",
+											"                                mode: \"raw\",\r",
+											"                                raw: JSON.stringify({\r",
+											"                                    isRedeemed: true\r",
+											"                                })\r",
+											"                            }\r",
+											"                        }, function (err, res) {\r",
+											"                            if (err) {\r",
+											"                                console.log(\"Error al hacer PUT a ticket:\", err);\r",
+											"                            } else {\r",
+											"                                console.log(\"PUT exitoso. Ticket marcado como redimido.\");\r",
+											"                            }\r",
+											"                        });\r",
+											"\r",
+											"                    } else {\r",
+											"                        console.log(\"No se encontró un token en la respuesta de login.\");\r",
+											"                    }\r",
+											"                }\r",
+											"            });\r",
+											"\r",
 											"        } else {\r",
-											"            const token = res.json().token;\r",
-											"            if (token) {\r",
-											"                pm.collectionVariables.set(\"token\", token);\r",
-											"                console.log(\"Token guardado:\", token);\r",
-											"            }\r",
+											"            console.log(\"No se encontraron activeTicketIds en la respuesta de seed.\");\r",
 											"        }\r",
-											"    });\r",
-											"}\r",
-											"pm.collectionVariables.set(\"ticketId\",\"8acc6d3c-c84f-427c-82d9-88cd252df208\");"
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is JSON\", function () {\r",
+											"    pm.response.to.be.withBody;\r",
+											"    pm.response.to.be.json;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error message\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.message).to.eql(\"Cannot update already redeemed ticket\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error type\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.error).to.eql(\"Bad Request\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct statusCode\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.statusCode).to.eql(400);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"isRedeemed\":true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/tickets/{{ticketId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"tickets",
+										"{{ticketId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "REDEEM TICKET UNACTIVE",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const ticketEmail = pm.collectionVariables.get(\"ticketEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Paso 1: Obtener seed y extraer un activeTicketId\r",
+											"pm.sendRequest({\r",
+											"    url: `${baseUrl}/api/seed`,\r",
+											"    method: \"GET\"\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error al obtener /api/seed:\", err);\r",
+											"    } else {\r",
+											"        const seedData = res.json();\r",
+											"        const unactiveTicketIds = seedData.unactiveTicketIds;\r",
+											"\r",
+											"        if (unactiveTicketIds && unactiveTicketIds.length > 0) {\r",
+											"            const selectedTicketId = unactiveTicketIds[0];\r",
+											"            pm.collectionVariables.set(\"ticketId\", selectedTicketId);\r",
+											"            console.log(\"ID de presentación seleccionado:\", selectedTicketId);\r",
+											"\r",
+											"            // Paso 2: Login con ticketEmail\r",
+											"            pm.sendRequest({\r",
+											"                url: authUrl,\r",
+											"                method: \"POST\",\r",
+											"                header: {\r",
+											"                    \"Content-Type\": \"application/json\"\r",
+											"                },\r",
+											"                body: {\r",
+											"                    mode: \"raw\",\r",
+											"                    raw: JSON.stringify({\r",
+											"                        email: ticketEmail,\r",
+											"                        password: password\r",
+											"                    })\r",
+											"                }\r",
+											"            }, function (err, res) {\r",
+											"                if (err) {\r",
+											"                    console.log(\"Error al autenticar con ticketEmail:\", err);\r",
+											"                } else {\r",
+											"                    const token = res.json().token;\r",
+											"                    if (token) {\r",
+											"                        pm.collectionVariables.set(\"token\", token);\r",
+											"                        console.log(\"Token guardado correctamente:\", token);\r",
+											"                        // Aquí podrías invocar otra función, si necesitas continuar el flujo\r",
+											"                    } else {\r",
+											"                        console.log(\"No se encontró un token en la respuesta de login.\");\r",
+											"                    }\r",
+											"                }\r",
+											"            });\r",
+											"\r",
+											"        } else {\r",
+											"            console.log(\"No se encontraron unactiveTicketIds en la respuesta de seed.\");\r",
+											"        }\r",
+											"    }\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response is JSON\", function () {\r",
+											"    pm.response.to.be.withBody;\r",
+											"    pm.response.to.be.json;\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error message\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.message).to.eql(\"Cannot redeem unactive ticket\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct error type\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.error).to.eql(\"Bad Request\");\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has correct statusCode\", function () {\r",
+											"    var jsonData = pm.response.json();\r",
+											"    pm.expect(jsonData.statusCode).to.eql(400);\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"isRedeemed\":true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/tickets/{{ticketId}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"tickets",
+										"{{ticketId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "REEDEM TICKET WITHOUT AUTH",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Variables de colección\r",
+											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
+											"const ticketEmail = pm.collectionVariables.get(\"superadminEmail\");\r",
+											"const password = pm.collectionVariables.get(\"password\");\r",
+											"const authUrl = `${baseUrl}/api/auth/login`;\r",
+											"\r",
+											"// Paso 1: Obtener seed y extraer un activeTicketId\r",
+											"pm.sendRequest({\r",
+											"    url: `${baseUrl}/api/seed`,\r",
+											"    method: \"GET\"\r",
+											"}, function (err, res) {\r",
+											"    if (err) {\r",
+											"        console.log(\"Error al obtener /api/seed:\", err);\r",
+											"    } else {\r",
+											"        const seedData = res.json();\r",
+											"        const activeTicketIds = seedData.activeTicketIds;\r",
+											"\r",
+											"        if (activeTicketIds && activeTicketIds.length > 0) {\r",
+											"            const selectedTicketId = activeTicketIds[0];\r",
+											"            pm.collectionVariables.set(\"ticketId\", selectedTicketId);\r",
+											"            console.log(\"ID de presentación seleccionado:\", selectedTicketId);\r",
+											"\r",
+											"            // Paso 2: Login con ticketEmail\r",
+											"            pm.sendRequest({\r",
+											"                url: authUrl,\r",
+											"                method: \"POST\",\r",
+											"                header: {\r",
+											"                    \"Content-Type\": \"application/json\"\r",
+											"                },\r",
+											"                body: {\r",
+											"                    mode: \"raw\",\r",
+											"                    raw: JSON.stringify({\r",
+											"                        email: ticketEmail,\r",
+											"                        password: password\r",
+											"                    })\r",
+											"                }\r",
+											"            }, function (err, res) {\r",
+											"                if (err) {\r",
+											"                    console.log(\"Error al autenticar con ticketEmail:\", err);\r",
+											"                } else {\r",
+											"                    const token = res.json().token;\r",
+											"                    if (token) {\r",
+											"                        pm.collectionVariables.set(\"token\", token);\r",
+											"                        console.log(\"Token guardado correctamente:\", token);\r",
+											"                        // Aquí podrías invocar otra función, si necesitas continuar el flujo\r",
+											"                    } else {\r",
+											"                        console.log(\"No se encontró un token en la respuesta de login.\");\r",
+											"                    }\r",
+											"                }\r",
+											"            });\r",
+											"\r",
+											"        } else {\r",
+											"            console.log(\"No se encontraron activeTicketIds en la respuesta de seed.\");\r",
+											"        }\r",
+											"    }\r",
+											"});\r",
+											""
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -6483,7 +6874,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"isRedeemed\":true,\r\n    \"isActive\":true\r\n\r\n}",
+									"raw": "{\r\n    \"isRedeemed\":true\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -7073,39 +7464,123 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
+											"// Variables de colección\r",
 											"const baseUrl = pm.collectionVariables.get(\"base_url\");\r",
-											"const email = pm.collectionVariables.get(\"eventmanageEmail\");\r",
+											"const email = pm.collectionVariables.get(\"userEmail\");\r",
 											"const password = pm.collectionVariables.get(\"password\");\r",
-											"\r",
 											"const authUrl = `${baseUrl}/api/auth/login`;\r",
 											"\r",
-											"pm.sendRequest({\r",
-											"    url: authUrl,\r",
-											"    method: \"POST\",\r",
-											"    header: {\r",
-											"        \"Content-Type\": \"application/json\"\r",
-											"    },\r",
-											"    body: {\r",
-											"        mode: \"raw\",\r",
-											"        raw: JSON.stringify({\r",
-											"            email: email,\r",
-											"            password: password\r",
-											"        })\r",
-											"    }\r",
-											"}, function (err, res) {\r",
-											"    if (err) {\r",
-											"        console.log(\"Error en la solicitud:\", err);\r",
-											"    } else {\r",
-											"        const token = res.json().token;\r",
-											"        \r",
-											"        if (token) {\r",
-											"            pm.collectionVariables.set(\"token\", token);\r",
-											"            console.log(\"Token guardado:\", token);\r",
-											"        } else {\r",
-											"            console.log(\"No se encontró un token en la respuesta.\");\r",
+											"// Función para crear la presentación con el eventId\r",
+											"function crearPresentacion(eventId, token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/presentation`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"place\": \"Campin\",\r",
+											"                \"capacity\": 4000,\r",
+											"                \"openDate\": \"2025-05-06T08:00:00Z\",\r",
+											"                \"startDate\": \"2025-05-06T10:00:00Z\",\r",
+											"                \"latitude\": 6.25184,\r",
+											"                \"longitude\": -75.56359,\r",
+											"                \"description\": \"A musical event in the main stadium.\",\r",
+											"                \"ticketAvailabilityDate\": \"2025-04-20T00:00:00Z\",\r",
+											"                \"ticketSaleAvailabilityDate\": \"2025-04-25T00:00:00Z\",\r",
+											"                \"city\": \"Bogota\",\r",
+											"                \"price\": 50000,\r",
+											"                \"eventId\": eventId\r",
+											"            })\r",
 											"        }\r",
-											"    }\r",
-											"});\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear presentación:\", err);\r",
+											"        } else {\r",
+											"            const presentation = res.json();\r",
+											"            if (presentation && presentation.idPresentation) {\r",
+											"                pm.collectionVariables.set(\"presentationId\", presentation.idPresentation);\r",
+											"                console.log(\"Presentación creada con ID:\", presentation.idPresentation);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID de la presentación en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Función para crear el evento después de obtener el token\r",
+											"function crearEvento(token) {\r",
+											"    pm.sendRequest({\r",
+											"        url: `${baseUrl}/api/event/create`,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\",\r",
+											"            \"Authorization\": `Bearer ${token}`\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                \"name\": \"Concierto de Rock\",\r",
+											"                \"bannerPhotoUrl\": \"https://example.com/banner.jpg\",\r",
+											"                \"isPublic\": true\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error al crear evento:\", err);\r",
+											"        } else {\r",
+											"            const event = res.json();\r",
+											"            const eventId = event.id;\r",
+											"            if (eventId) {\r",
+											"                pm.collectionVariables.set(\"eventId\", eventId);\r",
+											"                console.log(\"Evento creado con ID:\", eventId);\r",
+											"\r",
+											"                // Crear la presentación usando el eventId\r",
+											"                crearPresentacion(eventId, token);\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró el ID del evento en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"}\r",
+											"\r",
+											"// Comprobar si ya hay token\r",
+											"const tokenExistente = false;\r",
+											"if (!tokenExistente) {\r",
+											"    pm.sendRequest({\r",
+											"        url: authUrl,\r",
+											"        method: \"POST\",\r",
+											"        header: {\r",
+											"            \"Content-Type\": \"application/json\"\r",
+											"        },\r",
+											"        body: {\r",
+											"            mode: \"raw\",\r",
+											"            raw: JSON.stringify({\r",
+											"                email: email,\r",
+											"                password: password\r",
+											"            })\r",
+											"        }\r",
+											"    }, function (err, res) {\r",
+											"        if (err) {\r",
+											"            console.log(\"Error en la autenticación:\", err);\r",
+											"        } else {\r",
+											"            const token = res.json().token;\r",
+											"            if (token) {\r",
+											"                pm.collectionVariables.set(\"token\", token);\r",
+											"                console.log(\"Token guardado:\", token);\r",
+											"                crearEvento(token); // Crear evento después de guardar el token\r",
+											"            } else {\r",
+											"                console.log(\"No se encontró un token en la respuesta.\");\r",
+											"            }\r",
+											"        }\r",
+											"    });\r",
+											"} else {\r",
+											"    console.log(\"Usando token existente.\");\r",
+											"    crearEvento(tokenExistente); // Crear evento directamente si ya hay token\r",
+											"}\r",
 											""
 										],
 										"type": "text/javascript",
@@ -7169,6 +7644,9 @@
 									}
 								}
 							],
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
 							"request": {
 								"auth": {
 									"type": "bearer",
@@ -7184,7 +7662,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n            \"place\": \"Campin\",\r\n            \"capacity\": 4000,\r\n            \"openDate\": \"2025-05-06T08:00:00Z\",\r\n            \"startDate\": \"2025-05-06T10:00:00Z\",\r\n            \"latitude\": 6.25184,\r\n            \"longitude\": -75.56359,\r\n            \"description\": \"A musical event in the main stadium.\",\r\n            \"ticketAvailabilityDate\": \"2025-04-20T00:00:00Z\",\r\n            \"ticketSaleAvailabilityDate\": \"2025-04-25T00:00:00Z\",\r\n            \"city\": \"Bogota\",\r\n            \"price\": 50000,\r\n            \"eventId\": \"85aaed79-dee8-430f-9ba0-e1eb6114ac39\"\r\n}",
+									"raw": "{\r\n            \"place\": \"Campin\",\r\n            \"capacity\": 4000,\r\n            \"openDate\": \"2025-05-06T08:00:00Z\",\r\n            \"startDate\": \"2025-05-06T10:00:00Z\",\r\n            \"latitude\": 6.25184,\r\n            \"longitude\": -75.56359,\r\n            \"description\": \"A musical event in the main stadium.\",\r\n            \"ticketAvailabilityDate\": \"2025-04-20T00:00:00Z\",\r\n            \"ticketSaleAvailabilityDate\": \"2025-04-25T00:00:00Z\",\r\n            \"city\": \"Bogota\",\r\n            \"price\": 50000,\r\n            \"eventId\": \"0454ccd9-0cb7-4fa7-b05a-7439728ba4fd\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -8121,12 +8599,12 @@
 			"type": "string"
 		},
 		{
-			"key": "eventManagerToken\n",
+			"key": "eventManagerToken",
 			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFiYzZiMGU5LTcxMjMtNDJmYS1iNGE2LTMwYTcyNWIyNmZkMiIsImlhdCI6MTc0NzA5MjYwNSwiZXhwIjoxNzQ3MDk2MjA1fQ.EmAIMr4KPWSfcp8O36o70vIwfZ--o5YgE5ZSJL9so1s",
 			"type": "string"
 		},
 		{
-			"key": "userTicketToken\n",
+			"key": "userTicketToken",
 			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM2NDQ2YjMyLTYwYTctNDU1Ni1iNzNiLWUwZDcxNmJlYzk0YyIsImlhdCI6MTc0NzEwMTk4OSwiZXhwIjoxNzQ3MTA1NTg5fQ.cDJi2Tt-j9p5tCXTDNzAd35uB878-KmxcGm0sX3kSd8",
 			"type": "string"
 		},
@@ -8138,6 +8616,11 @@
 		{
 			"key": "cancelPresentation",
 			"value": "0281601c-e96a-46a0-bc26-998f470f52a9",
+			"type": "string"
+		},
+		{
+			"key": "ticketEmail",
+			"value": "ticketchecker@gmail.com",
 			"type": "string"
 		}
 	]

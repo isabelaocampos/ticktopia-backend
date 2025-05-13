@@ -14,7 +14,7 @@ export class User {
     email: string;
 
     @Exclude()
-    @Column('text')
+    @Column('text',{ select: false })
     password?: string;
 
     @Column('text')

@@ -37,27 +37,19 @@ export class TicketService {
     return this.ticketRepo.save(ticket);
   }
 
-  async createCheckoutSession(quantity: number, user: User, presentation: Presentation) {
-    const ticket = this.ticketRepo.create({
-      buyDate: new Date(),
-      isRedeemed: false,
-      isActive: false,
-      user,
-      presentation,
-    });
-    const ticketData = await this.ticketRepo.save(ticket);
-
+  async createCheckoutSession(quantity: number, ticketIds: string[], user: User, presentation: Presentation) {
     const data = {
       'line_items[0][quantity]': quantity,
       'line_items[0][price_data][currency]': 'cop',
       'line_items[0][price_data][product_data][name]': presentation.event.name,
-      'line_items[0][price_data][unit_amount]': presentation.price * quantity * 100,
+      'line_items[0][price_data][unit_amount]': presentation.price * 100,
       'payment_method_types[0]': 'card',
       mode: 'payment',
-      success_url: `${process.env.BASE_URL}/success?ticketId=${ticketData.id}`,
-      cancel_url: `${process.env.BASE_URL}/failure`,
+      success_url: `${process.env.BASE_URL}/success`,
+      cancel_url: `${process.env.BASE_URL}/failed`,
       'metadata[userId]': user.id,
-      'metadata[ticketId]': ticket.id,
+      'metadata[ticketIds]': JSON.stringify(ticketIds), // ← Aquí serializas el array
+
     };
 
     const headers = {
@@ -66,7 +58,7 @@ export class TicketService {
     };
 
     try {
-      const response: {data: {url: string}} = await axios.post(
+      const response: { data: { url: string } } = await axios.post(
         'https://api.stripe.com/v1/checkout/sessions',
         qs.stringify(data),
         { headers },
@@ -78,8 +70,9 @@ export class TicketService {
     }
   }
 
-  findAll() {
-    return this.ticketRepo.find();
+  findAll(user: User) {
+
+    return this.ticketRepo.find({ where: { user: user } });
   }
 
   async findOne(id: string) {
@@ -88,7 +81,19 @@ export class TicketService {
     return ticket;
   }
 
-  async update(id: string, dto: UpdateTicketDto) {
+  async update(id: string, dto: UpdateTicketDto & { isActive?: boolean }) {
+    const foundTicket = await this.findOne(id);
+    if (!foundTicket) {
+      throw new NotFoundException("Ticket not found");
+    }
+
+    if (dto.isRedeemed && !foundTicket.isActive) {
+      throw new BadRequestException("Cannot redeem unactive ticket");
+    }
+
+    if (foundTicket.isRedeemed) {
+      throw new BadRequestException("Cannot update already redeemed ticket");
+    }
     const ticket = await this.ticketRepo.preload({ id, ...dto });
     if (!ticket) throw new NotFoundException('Ticket not found');
     return this.ticketRepo.save(ticket);
@@ -109,32 +114,34 @@ export class TicketService {
     const presentation = await this.presentationRepo.findOne({
       where: { idPresentation: buyDto.presentationId },
     });
-  
+
     if (!user || !presentation) {
       throw new NotFoundException('User or Presentation not found');
     }
-  
+
     const sold = await this.ticketRepo.count({
       where: {
         presentation: { idPresentation: presentation.idPresentation },
         isActive: true,
       },
     });
-  
+
     if (sold + buyDto.quantity > presentation.capacity) {
       throw new BadRequestException('Not enough tickets available');
     }
-  
-    const ticket = this.ticketRepo.create({
-      user,
-      presentation,
-      buyDate: new Date(),
-      isActive: true,
-      isRedeemed: false,
-      quantity: buyDto.quantity,
-    });
-  
-    return this.ticketRepo.save(ticket);
+    const tickets = Array.from({ length: buyDto.quantity }, () =>
+      this.ticketRepo.create({
+        user,
+        presentation,
+        buyDate: new Date(),
+        isActive: false,
+        isRedeemed: false,
+        quantity: 1, // cada ticket representa 1 entrada
+      })
+    );
+    const savedTickets = await this.ticketRepo.save(tickets);
+    const savedTicketsIds = savedTickets.map((ticket) => ticket.id);
+    return { ...savedTickets, checkoutSession: (await this.createCheckoutSession(buyDto.quantity, savedTicketsIds, user, presentation)).url };
   }
 
 }
