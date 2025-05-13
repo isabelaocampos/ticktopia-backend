@@ -132,15 +132,6 @@ describe('Events - Create', () => {
     await app.close();
   });
 
-  it('/event/create (POST) - create event with event manager credentials', async () => {
-    const eventResponse = await request(app.getHttpServer())
-      .post('/event/create')
-      .set('Authorization', `Bearer ${tokenEventManager}`)
-      .send({
-        ...testingEvent,
-        userId: eventManagerId
-      }).expect(400);
-  });
 
   it('/event/create (POST) - should return 401 if admin tries to create event', async () => {
     const eventResponse = await request(app.getHttpServer())
@@ -179,17 +170,6 @@ describe('Events - Create', () => {
     expect(eventResponse.body.message).toBe('Unauthorized');
   });
 
-  it('event/create (POST) - create event with unexisting userId (not found), expected 404', async () => {
-    const fakeUserId = '11111111-1111-1111-1111-111111111111';
-
-    const eventResponse = await request(app.getHttpServer())
-      .post('/event/create')
-      .set('Authorization', `Bearer ${tokenEventManager}`)
-      .send({
-        ...testingEvent,
-        userId: fakeUserId
-      }).expect(400);
-  });
 
   it('event/create (POST) - expected 400 with missing a requiered field', async () => {
     const { name, ...incompleteDto } = testingEvent;

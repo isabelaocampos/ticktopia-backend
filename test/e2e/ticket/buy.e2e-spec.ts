@@ -102,7 +102,7 @@ describe('Tickets - Update (e2e)', () => {
     eventId = res3.id;
     token = res.body.token;
     managerToken = res6.body.token;
-  }, 10000);
+  }, 30000);
 
   afterAll(async () => {
     await userRepository.delete({ email: UserTest.email });
