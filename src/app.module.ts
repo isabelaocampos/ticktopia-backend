@@ -17,6 +17,7 @@ import { FailedController } from './failed/failed.controller';
 import { ReportModule } from './report/report.module';
 import { WebhookController } from './webhook/webhook.controller';
 import { WebhookModule } from './webhook/webhook.module';
+import { GcpModule } from './gcp/gcp.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -37,7 +38,8 @@ import { WebhookModule } from './webhook/webhook.module';
     PresentationModule,
     TicketModule,
     ReportModule,
-    WebhookModule
+    WebhookModule,
+    GcpModule
   ],
   controllers: [HealthController, SuccessController, FailedController, WebhookController],
   providers: [],
