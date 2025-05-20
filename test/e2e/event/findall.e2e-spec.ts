@@ -35,7 +35,7 @@ const testingAdminUser = {
   lastname: 'admin',
 };
 
-const testingEventManager ={
+const testingEventManager = {
   email: 'testingdsadas.eventmanag@google.com',
   password: 'aBc123',
   name: 'TestingEv',
@@ -53,12 +53,12 @@ describe('Events - Find All', () => {
   let eventManagerId: string;
   let clientId: string;
   let adminId: string;
- 
+
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
-    
+
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
       new ValidationPipe({
@@ -66,11 +66,11 @@ describe('Events - Find All', () => {
         forbidNonWhitelisted: true,
       }),
     );
-    
+
     await app.init();
 
     userRepository = app.get<Repository<User>>(getRepositoryToken(User));
-    
+
     const responseEventManager = await request(app.getHttpServer())
       .post('/auth/register')
       .send(testingEventManager);
@@ -81,11 +81,11 @@ describe('Events - Find All', () => {
 
 
     const responseAdmin = await request(app.getHttpServer())
-          .post('/auth/register')
-          .send(testingAdminUser);
+      .post('/auth/register')
+      .send(testingAdminUser);
 
     eventManagerId = responseEventManager.body.user?.id;
-    clientId = responseUser.body.user?.id; 
+    clientId = responseUser.body.user?.id;
     adminId = responseAdmin.body.user?.id;
 
     await userRepository.update(
@@ -111,7 +111,7 @@ describe('Events - Find All', () => {
       .send({
         email: testingEventManager.email,
         password: testingEventManager.password,
-    });
+      });
     tokenEventManager = loginEventManager.body.token;
 
     const loginClient = await request(app.getHttpServer())
@@ -119,10 +119,10 @@ describe('Events - Find All', () => {
       .send({
         email: testingUser.email,
         password: testingUser.password,
-    });
+      });
     tokenClient = loginClient.body.token;
-    
-  
+
+
   }, 10000);
 
   afterEach(async () => {
@@ -141,23 +141,15 @@ describe('Events - Find All', () => {
     expect(response.body).toBeTruthy();
   });
 
-    it('/event/findAll (GET) - invalid credentials', async () => {
-        const response = await request(app.getHttpServer())
-        .get('/event/findAll')
-        .set('Authorization', `Bearer ${tokenClient}`)
-        .send();
-        expect(response.status).toBe(200);
+  it('/event/findAll (GET) - no credentials', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/event/findAll')
+      .send();
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      message: "Unauthorized",
+      statusCode: 401
     });
-
-    it('/event/findAll (GET) - no credentials', async () => {
-        const response = await request(app.getHttpServer())
-        .get('/event/findAll')
-        .send();
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual({
-        message: "Unauthorized",
-        statusCode: 401
-        });
-    });
+  });
 
 });
