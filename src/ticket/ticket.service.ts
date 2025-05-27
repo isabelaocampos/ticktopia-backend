@@ -9,6 +9,7 @@ import { Presentation } from '../presentation/entities/presentation.entity';
 import axios from 'axios';
 import * as qs from 'qs';
 import { BuyTicketDto } from './dto/buy-ticket.dto';
+import { addHours, isAfter, isBefore } from 'date-fns';
 
 @Injectable()
 export class TicketService {
@@ -45,8 +46,8 @@ export class TicketService {
       'line_items[0][price_data][unit_amount]': presentation.price * 100,
       'payment_method_types[0]': 'card',
       mode: 'payment',
-      success_url: `${process.env.BASE_URL}/success`,
-      cancel_url: `${process.env.BASE_URL}/failed`,
+      success_url: `${process.env.FRONTEND_URL}/buy/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/buy/${presentation.idPresentation}`,
       'metadata[userId]': user.id,
       'metadata[ticketIds]': JSON.stringify(ticketIds), // ← Aquí serializas el array
 
@@ -71,8 +72,11 @@ export class TicketService {
   }
 
   findAll(user: User) {
+    return this.ticketRepo.find({ where: { user: user, isActive: true, isRedeemed: false } });
+  }
 
-    return this.ticketRepo.find({ where: { user: user } });
+  findAllHistoric(user: User) {
+    return this.ticketRepo.find({ where: { user: user, isActive: true, isRedeemed: true } });
   }
 
   async findOne(id: string) {
@@ -87,15 +91,33 @@ export class TicketService {
       throw new NotFoundException("Ticket not found");
     }
 
-    if (dto.isRedeemed && !foundTicket.isActive) {
-      throw new BadRequestException("Cannot redeem unactive ticket");
+    const now = new Date();
+    const openDate = new Date(foundTicket.presentation.openDate);
+    const startDate = new Date(foundTicket.presentation.startDate);
+    const fiveHoursAfterStart = addHours(startDate, 5);
+
+    if (dto.isRedeemed) {
+      if (!foundTicket.isActive) {
+        throw new BadRequestException("Cannot redeem inactive ticket");
+      }
+      console.log(now);
+      console.log(openDate)
+      if (isBefore(now, openDate)) {
+        throw new BadRequestException("Cannot redeem ticket before doors open");
+      }
+
+      if (isAfter(now, fiveHoursAfterStart)) {
+        throw new BadRequestException("Cannot redeem ticket after 5 hours of concert start");
+      }
     }
 
     if (foundTicket.isRedeemed) {
       throw new BadRequestException("Cannot update already redeemed ticket");
     }
+
     const ticket = await this.ticketRepo.preload({ id, ...dto });
     if (!ticket) throw new NotFoundException('Ticket not found');
+
     return this.ticketRepo.save(ticket);
   }
 

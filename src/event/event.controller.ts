@@ -23,7 +23,7 @@ import { ValidRoles } from '../auth/enums/valid-roles.enum';
 @ApiTags('Event')
 @Controller('event')
 export class EventController {
-  constructor(private readonly EventService: EventService) {}
+  constructor(private readonly EventService: EventService,) { }
 
   @Post('create')
   @ApiResponse({ status: 201, description: 'Event was created' })
@@ -35,7 +35,6 @@ export class EventController {
   }
 
   @Get('findAll')
-  @Auth(ValidRoles.admin, ValidRoles.eventManager, ValidRoles.client)
   @ApiResponse({ status: 200, description: 'All events returned' })
   findAll(@Query('limit') limit: string, @Query('offset') offset: string) {
     const parsedLimit = parseInt(limit, 10) || 10;
@@ -43,16 +42,21 @@ export class EventController {
     return this.EventService.findAll(parsedLimit, parsedOffset);
   }
 
-  @Get('find/user/:userId')
+  @Get('find/user')
   @Auth(ValidRoles.admin, ValidRoles.eventManager)
-  findAllByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.EventService.findAllByUserId(userId);
+  async findAllByUserId(@GetUser() user: User) {
+    return this.EventService.findAllByUserId(user.id);
+  }
+
+  @Get('find/manager/:term')
+  @Auth(ValidRoles.admin, ValidRoles.eventManager)
+  findOneUnrestricted(@Param('term') term: string) {
+    return this.EventService.findOneUnrestricted(term);
   }
 
   @Get('find/:term')
-  @Auth(ValidRoles.admin, ValidRoles.eventManager)
-  findOne(@Param('term') term: string, @GetUser() user: User) {
-    return this.EventService.findOne(term, user);
+  findOne(@Param('term') term: string) {
+    return this.EventService.findOne(term);
   }
 
   @Put('update/:id')
