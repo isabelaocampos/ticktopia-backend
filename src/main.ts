@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,7 +17,14 @@ async function bootstrap() {
       forbidNonWhitelisted: true
     })
   )
-  
+  app.enableCors({
+    origin: ['http://localhost:8080'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
+  });
+
+  app.use(cookieParser());
 
   const config = new DocumentBuilder()
     .setTitle('Ticktopia REST api')

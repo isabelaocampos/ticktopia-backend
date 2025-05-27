@@ -16,24 +16,24 @@ export class PresentationService {
     private readonly presentationRepository: Repository<Presentation>,
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
-  ) {}
+  ) { }
 
-async create(createPresentationDto: CreatePresentationDto) {
-  const event = await this.eventRepository.findOneBy({ id: createPresentationDto.eventId });
+  async create(createPresentationDto: Omit<CreatePresentationDto, 'validDates'>) {
+    const event = await this.eventRepository.findOneBy({ id: createPresentationDto.eventId });
 
-  if (!event) {
-    throw new NotFoundException(`Event with ID ${createPresentationDto.eventId} not found`);
+    if (!event) {
+      throw new NotFoundException(`Event with ID ${createPresentationDto.eventId} not found`);
+    }
+
+    try {
+      const newPresentation = this.presentationRepository.create({ ...createPresentationDto, event });
+      await this.presentationRepository.save(newPresentation);
+      return newPresentation;
+    } catch (error) {
+      this.logger.error('Error creating presentation', error.stack);
+      throw new InternalServerErrorException('Error creating presentation');
+    }
   }
-
-  try {
-    const newPresentation = this.presentationRepository.create({ ...createPresentationDto, event });
-    await this.presentationRepository.save(newPresentation);
-    return newPresentation;
-  } catch (error) {
-    this.logger.error('Error creating presentation', error.stack);
-    throw new InternalServerErrorException('Error creating presentation');
-  }
-}
 
 
   async findAll() {
@@ -46,7 +46,7 @@ async create(createPresentationDto: CreatePresentationDto) {
     }
   }
 
-  async findOne(id: string) {
+  async findOneUnRestricted(id: string) {
     try {
       const presentation = await this.presentationRepository.findOne({ where: { idPresentation: id }, relations: ['event'], });
       return presentation;
@@ -56,10 +56,53 @@ async create(createPresentationDto: CreatePresentationDto) {
     }
   }
 
+  async findOne(id: string) {
+    try {
+      const presentation = await this.presentationRepository.findOne({
+        where: {
+          idPresentation: id, event: { isPublic: true }, 
+        }, relations: ['event'],
+      });
+      return presentation;
+    } catch (error) {
+      this.logger.error(`Error fetching presentation with ID ${id}`, error.stack);
+      throw new NotFoundException(`Presentation with ID ${id} not found`);
+    }
+  }
+
+
+  async findByEventId(eventId: string): Promise<Presentation[]> {
+    try {
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+
+      const presentations = await this.presentationRepository
+        .createQueryBuilder('presentation')
+        .leftJoinAndSelect('presentation.event', 'event')           // trae el evento
+        .leftJoinAndSelect('event.user', 'user')                    // trae el usuario del evento
+        .where('event.id = :eventId', { eventId })
+        .andWhere('event.isPublic = true')                          // solo eventos públicos
+        .andWhere('presentation.openDate >= :twelveHoursAgo', { twelveHoursAgo })
+        .getMany();
+
+      if (presentations.length === 0) {
+        this.logger.warn(`No presentations found for public event with ID ${eventId}`);
+        return [];
+      }
+
+      return presentations;
+    } catch (error) {
+      this.logger.error(`Error fetching presentations for public event with ID ${eventId}`, error.stack);
+      throw new InternalServerErrorException('Error fetching presentations for public event');
+    }
+  }
+
+
+
+
   async update(id: string, updatePresentationDto: UpdatePresentationDto) {
     try {
       await this.presentationRepository.update(id, updatePresentationDto);
-      const updatedPresentation = await this.findOne(id); // Re-fetch the updated presentation
+      const updatedPresentation = await this.findOneUnRestricted(id); // Re-fetch the updated presentation
       return updatedPresentation;
     } catch (error) {
       this.logger.error(`Error updating presentation with ID ${id}`, error.stack);
@@ -70,7 +113,7 @@ async create(createPresentationDto: CreatePresentationDto) {
   async remove(id: string) {
     try {
       // Verificamos si la presentación existe
-      const presentationToRemove = await this.findOne(id);
+      const presentationToRemove = await this.findOneUnRestricted(id);
       if (!presentationToRemove) {
         throw new NotFoundException(`Presentation with ID ${id} not found`);
       }
@@ -99,5 +142,5 @@ async create(createPresentationDto: CreatePresentationDto) {
       throw new InternalServerErrorException('Error deleting all presentations');
     }
   }
-  
+
 }

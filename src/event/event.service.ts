@@ -62,7 +62,6 @@ export class EventService {
   }
 
 
-
   async update(id: string, updateEventDto: UpdateEventDto, user: User) {
     try {
       const event = await this.eventRepository.findOne({
@@ -77,9 +76,13 @@ export class EventService {
       if (event.user.id !== user.id) {
         throw new ForbiddenException('You can only update your own events');
       }
+      const hasTickets = await this.hasAnyPresentationWithTickets(event.id);
+      if (hasTickets && updateEventDto.isPublic === false) {
+        throw new BadRequestException("You cannot change visibility of an event with existing tickets");
+      }
 
       await this.eventRepository.update(id, updateEventDto);
-      const updatedEvent = await this.findOne(id, user);
+      const updatedEvent = await this.findOneUnrestricted(id);
       return updatedEvent;
     } catch (error) {
       if (
@@ -109,6 +112,11 @@ export class EventService {
       if (event.user.id !== user.id) {
         throw new ForbiddenException('You can only delete your own events');
       }
+      const hasTickets = await this.hasAnyPresentationWithTickets(event.id);
+
+      if (hasTickets) {
+        throw new BadRequestException("You cannot delete an event with existing tickets");
+      }
 
       await this.eventRepository.remove(event);
       return event;
@@ -126,10 +134,9 @@ export class EventService {
     }
   }
 
-
-  async findOne(term: string, user: User): Promise<Event> {
+  async findOneUnrestricted(term: string): Promise<Event> {
     const event = await this.eventRepository.findOne({
-      where: [{ id: term }, { name: term }],
+      where: [{ id: term}, { name: term }],
       relations: ['user'],
     });
 
@@ -137,30 +144,58 @@ export class EventService {
       throw new NotFoundException(`Event with id or name "${term}" not found`);
     }
 
-    const isAdmin = user.roles.includes(ValidRoles.admin);
-    const isOwner = event.user.id === user.id;
+    return event;
+  }
 
-    if (!isAdmin && !isOwner) {
-      throw new ForbiddenException('Access to this event is restricted');
+  async findOne(term: string): Promise<Event> {
+    const event = await this.eventRepository.findOne({
+      where: [{ id: term, isPublic: true }, { name: term }],
+      relations: ['user'],
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with id or name "${term}" not found`);
     }
 
     return event;
   }
 
+  async hasAnyPresentationWithTickets(eventId: string): Promise<boolean> {
+    const result = await this.eventRepository
+      .createQueryBuilder()
+      .select('1')
+      .from('presentation', 'presentation')
+      .innerJoin('ticket', 'ticket', 'ticket.presentationIdPresentation = presentation.idPresentation')
+      .where('presentation.eventId = :eventId', { eventId })
+      .limit(1)
+      .getRawOne();
+
+    return !!result;
+  }
+
+
 
   async findAll(limit = 10, offset = 0) {
     try {
-      const events = await this.eventRepository.find({
-        take: limit,
-        skip: offset,
-        relations: ['user'], // importante
-      });
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
-      return instanceToPlain(events); // quita los campos con @Exclude
+      const events = await this.eventRepository
+        .createQueryBuilder('event')
+        .leftJoinAndSelect('event.user', 'user')
+        .leftJoinAndSelect('event.presentations', 'presentation')
+        .where('presentation.openDate >= :twelveHoursAgo', { twelveHoursAgo })
+        .andWhere('event.isPublic = :isPublic', { isPublic: true })
+        .take(limit)
+        .skip(offset)
+        .getMany();
+
+      return instanceToPlain(events);
     } catch (error) {
       this.handleExceptions(error);
     }
   }
+
+
 
   async findAllByUserId(userId: string) {
     try {

@@ -52,7 +52,7 @@ export class TicketController {
   @ApiOperation({ summary: 'Buy a ticket (simulated)' })
   @ApiResponse({ status: 201, description: 'Ticket purchased' })
   @ApiResponse({ status: 500, description: 'User or presentation not found' })
-  @Auth(ValidRoles.client)
+  @Auth(ValidRoles.client, ValidRoles.admin)
   async buyTicket(@Body() dto: BuyTicketDto, @GetUser() user: User) {
     const presentation = await this.presentationService.findOne(dto.presentationId);
 
@@ -70,6 +70,14 @@ export class TicketController {
   @Auth(ValidRoles.client)
   findAll(@GetUser() user: User) {
     return this.ticketService.findAll(user);
+  }
+
+  @Get("historic")
+  @ApiOperation({ summary: 'Get all tickets (admin)' })
+  @ApiResponse({ status: 200, description: 'List of all tickets' })
+  @Auth(ValidRoles.client)
+  findAllHistoric(@GetUser() user: User) {
+    return this.ticketService.findAllHistoric(user);
   }
 
 

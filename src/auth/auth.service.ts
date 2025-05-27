@@ -11,6 +11,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserDto } from './dto/find-user.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UpdateRoleDto } from './dto/update-roles.dto';
+import { Response } from 'express'; // ✅ CORRECTO
 
 @Injectable()
 export class AuthService {
@@ -44,24 +45,31 @@ export class AuthService {
   }
 
 
-  async login(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto, res: Response) {
     const { email, password } = loginUserDto;
     const user = await this.userRepository.findOne({
       where: { email, isActive: true },
-      select: { email: true, password: true, id: true, isActive: true }
+      select: { email: true, password: true, id: true, isActive: true, roles: true }
     });
 
-    if (!user) throw new UnauthorizedException(`User with email ${email} not found`);
+    if (!user) throw new NotFoundException(`User with email ${email} not found`);
 
     if (!bcrypt.compareSync(password, user.password!))
-      throw new UnauthorizedException(`Email or password incorrect`)
+      throw new UnauthorizedException(`Email or password incorrect`);
 
     delete user.password;
 
-    return {
-      user: user,
-      token: this.getJwtToken({ id: user.id })
-    }
+    const token = this.getJwtToken({ id: user.id });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // solo por HTTPS en producción
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 días
+      path: '/',
+    });
+    console.log(token); 
+    return { user }; // ya no devuelves el token, va en la cookie
   }
 
   async deleteAllUsers(): Promise<{ message: string }> {
@@ -157,17 +165,17 @@ export class AuthService {
 
 
   async updateUserRoles({ roles }: UpdateRoleDto, userId: string) {
-  const user = await this.userRepository.findOneBy({ id: userId });
+    const user = await this.userRepository.findOneBy({ id: userId });
 
-  if (!user) {
-    throw new NotFoundException(`User with ID ${userId} not found`);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    user.roles = roles;
+    await this.userRepository.save(user);
+    delete user.password;
+    return user;
   }
-
-  user.roles = roles;
-  await this.userRepository.save(user);
-  delete user.password;
-  return user;
-}
 
 
 

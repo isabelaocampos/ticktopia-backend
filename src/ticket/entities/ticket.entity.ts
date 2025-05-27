@@ -27,16 +27,16 @@ export class Ticket {
 
 
     @ManyToOne(
-        () => User, 
-        user => user.tickets, 
+        () => User,
+        user => user.tickets,
         { onDelete: 'CASCADE' })
     user: User;
 
 
-    
+
     @ManyToOne(
         () => Presentation,
-        (presentation ) => presentation.tickets,
+        (presentation) => presentation.tickets,
         { cascade: true, eager: true, nullable: false }
     )
     presentation: Presentation;

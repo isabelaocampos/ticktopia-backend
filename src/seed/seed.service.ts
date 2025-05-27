@@ -34,7 +34,7 @@ export class SeedService {
     const unactiveTicketIds = tickets
       .filter(ticket => !ticket.isActive)
       .map(ticket => ticket.id);
-    return { message: "SEED EXECUTED", activeTicketIds, unactiveTicketIds};
+    return { message: "SEED EXECUTED", activeTicketIds, unactiveTicketIds };
   }
 
   async insertNewUsers() {

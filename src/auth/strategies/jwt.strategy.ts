@@ -6,7 +6,7 @@ import { User } from "../entities/user.entity";
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from "../interfaces/jwt.interface";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy){
@@ -16,24 +16,29 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         private readonly userRepository: Repository<User>,
         private configService: ConfigService
     ){
-
         super({
             secretOrKey: configService.get('JWT_SECRET') as string ?? "super-secreto",
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
+            // Cambia esta línea para extraer el token de la cookie
+            jwtFromRequest: ExtractJwt.fromExtractors([
+                (request: Request) => {
+                    // Extrae el token de la cookie llamada 'token'
+                    // Puedes cambiar 'token' por el nombre de tu cookie
+                    return request?.cookies?.token;
+                }
+            ])
         })
     }
 
     async validate(payload: JwtPayload): Promise<User> {
         const {id} = payload;
-         const user = await this.userRepository.findOneBy({id});
+        const user = await this.userRepository.findOneBy({id});
 
-         if(!user) throw new UnauthorizedException(`Token not valid`);
-         
-         if(!user.isActive) throw new UnauthorizedException(`User is not active`);
-         
-         delete user.password;
+        if(!user) throw new UnauthorizedException(`Token not valid`);
+        
+        if(!user.isActive) throw new UnauthorizedException(`User is not active`);
+        
+        delete user.password;
 
-         return user;
+        return user;
     }
-    
 }
