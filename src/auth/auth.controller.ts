@@ -167,4 +167,18 @@ export class AuthController {
   updateRolesToUser(@Param() params: FindOneUserDto, @Body() roles: UpdateRoleDto) {
     return this.authService.updateUserRoles(roles, params.id);
   }
+
+  @Auth(ValidRoles.admin, ValidRoles.client, ValidRoles.eventManager)
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current authenticated user', description: 'Returns the current logged-in user based on JWT token' })
+  @ApiOkResponse({
+    description: 'User retrieved successfully',
+    type: User
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized - No valid token' })
+  getCurrentUser(@GetUser() user: User) {
+    return user;
+  }
+
 }
